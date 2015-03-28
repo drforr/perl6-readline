@@ -3,6 +3,9 @@ ReadLine
 
 ReadLine provides a Perl 6 interface to libreadline.
 
+XXX This will probably be a frontend to ReadLine::Gnu when that's factored out.
+XXX For the moment keep all the code here in the ReadLine module.
+
 Installation
 ============
 
