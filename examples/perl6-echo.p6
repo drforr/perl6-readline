@@ -5,7 +5,7 @@ use ReadLine;
 my $readline = ReadLine.new;
 while my $response = $readline.readline( "prompt here (<cr> to exit)> " ) {
   if $response ~~ /\S/ {
-    $readline.add_history( $response );
+    $readline.add-history( $response );
   }
   say "[$response]";
 }
