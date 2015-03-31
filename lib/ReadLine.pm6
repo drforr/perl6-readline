@@ -93,24 +93,36 @@ class ReadLine {
   #
   # 2.4.3 Binding Keys
   #
+#typedef int rl_command_func_t PARAMS((int, int));
 
-  # Binds key to function in the currently active keymap. Returns non-zero in the case of an invalid key. 
+  # Binds key to function in the currently active keymap. Returns non-zero in
+  # the case of an invalid key. 
   #
-  #sub rl_bind_key ( Int $key, rl_command_func_t *function ) returns Int
-  #  is native( LIB ) { ... }
+  sub rl_bind_key ( Int $key, &callback ( Int, Int --> Int ) ) returns Int
+    is native( LIB ) { ... }
+  # XXX need method
 
-  # Bind key to function in map. Returns non-zero in the case of an invalid key. 
+  # Bind key to function in map. Returns non-zero in the case of an invalid
+  # key. 
   #
-  #sub rl_bind_key_in_map ( Int $key, rl_command_func_t *function, Keymap $map ) returns Int
-  #  is native( LIB ) { ... }
+  sub rl_bind_key_in_map ( Int $key, &callback ( Int, Int --> Int ), Keymap $map ) returns Int
+    is native( LIB ) { ... }
+  # XXX need method
 
-  # Binds key to function if it is not already bound in the currently active keymap. Returns non-zero in the case of an invalid key or if key is already bound. 
-  #sub rl_bind_key_if_unbound ( Int $key, rl_command_func_t *function ) returns Int
-  #  is native( LIB ) { ... }
+  # Binds key to function if it is not already bound in the currently active
+  # keymap. Returns non-zero in the case of an invalid key or if key is already
+  # bound. 
+  #
+  sub rl_bind_key_if_unbound ( Int $key, &callback ( Int, Int --> Int ) ) returns Int
+    is native( LIB ) { ... }
+  # XXX need method
 
-  # Binds key to function if it is not already bound in map. Returns non-zero in the case of an invalid key or if key is already bound. 
-  #sub rl_bind_key_if_unbound_in_map ( Int $key, rl_command_func_t *function, Keymap $map ) returns Int
-  #  is native( LIB ) { ... }
+  # Binds key to function if it is not already bound in map. Returns non-zero
+  # in the case of an invalid key or if key is already bound. 
+  #
+  sub rl_bind_key_if_unbound_in_map ( Int $key, &callback ( Int, Int --> Int ), Keymap $map ) returns Int
+    is native( LIB ) { ... }
+  # XXX need method
 
   # Bind key to the null function in the currently active keymap. Returns non-zero in case of error. 
   sub rl_unbind_key ( Int $key ) returns Int
@@ -125,8 +137,9 @@ class ReadLine {
     rl_unbind_key_in_map( $key, $map ) }
 
   # Unbind all keys that execute function in map. 
-  #sub rl_unbind_function_in_map (rl_command_func_t *function, Keymap $map) returns Int
-  #  is native( LIB ) { ... }
+  sub rl_unbind_function_in_map (&calback ( Int, Int --> Int ), Keymap $map) returns Int
+    is native( LIB ) { ... }
+  # XXX need method
 
   # Unbind all keys that are bound to command in map. 
   sub rl_unbind_command_in_map ( Str $command, Keymap $map ) returns Int
@@ -134,25 +147,42 @@ class ReadLine {
   method unbind-command-in-map ( Str $command, Keymap $map ) {
     rl_unbind_command_in_map( $command, $map ) }
 
-  # Bind the key sequence represented by the string keyseq to the function function, beginning in the current keymap. This makes new keymaps as necessary. The return value is non-zero if keyseq is invalid. 
-  #sub rl_bind_keyseq ( Str $keyseq, rl_command_func_t *function ) returns Int
-  #  is native( LIB ) { ... }
+  # Bind the key sequence represented by the string keyseq to the function
+  # function, beginning in the current keymap. This makes new keymaps as
+  # necessary. The return value is non-zero if keyseq is invalid. 
+  #
+  sub rl_bind_keyseq ( Str $keyseq, &callback ( Int, Int --> Int ) ) returns Int
+    is native( LIB ) { ... }
+  # XXX need method
 
-  # Bind the key sequence represented by the string keyseq to the function function. This makes new keymaps as necessary. Initial bindings are performed in map. The return value is non-zero if keyseq is invalid. 
-  #sub rl_bind_keyseq_in_map ( Str $keyseq, rl_command_func_t *function, Keymap $map) returns Int
-  #  is native( LIB ) { ... }
+  # Bind the key sequence represented by the string keyseq to the function
+  # function. This makes new keymaps as necessary. Initial bindings are
+  # performed in map. The return value is non-zero if keyseq is invalid. 
+  #
+  sub rl_bind_keyseq_in_map ( Str $keyseq, &callback ( Int, Int --> Int ), Keymap $map) returns Int
+    is native( LIB ) { ... }
+  # XXX needs method
 
   # Equivalent to rl_bind_keyseq_in_map. 
-  #sub rl_set_key ( Str $keyseq, rl_command_func_t *function, Keymap $map ) returns Int
-  #  is native( LIB ) { ... }
+  #
+  sub rl_set_key ( Str $keyseq, &callback ( Int, Int --> Int ), Keymap $map ) returns Int
+    is native( LIB ) { ... }
+  # XXX needs method
 
-  # Binds keyseq to function if it is not already bound in the currently active keymap. Returns non-zero in the case of an invalid keyseq or if keyseq is already bound. 
-  #sub rl_bind_keyseq_if_unbound ( Str $keyseq, rl_command_func_t *function ) returns Int
-  #  is native( LIB ) { ... }
+  # Binds keyseq to function if it is not already bound in the currently active
+  # keymap. Returns non-zero in the case of an invalid keyseq or if keyseq is
+  # already bound. 
+  #
+  sub rl_bind_keyseq_if_unbound ( Str $keyseq, &callback ( Int, Int --> Int ) ) returns Int
+    is native( LIB ) { ... }
+  # XXX needs method
 
-  # Binds keyseq to function if it is not already bound in map. Returns non-zero in the case of an invalid keyseq or if keyseq is already bound. 
-  #sub rl_bind_keyseq_if_unbound_in_map ( Str $keyseq, rl_command_func_t *function, Keymap $map) returns Int
-  #  is native( LIB ) { ... }
+  # Binds keyseq to function if it is not already bound in map. Returns
+  # non-zero in the case of an invalid keyseq or if keyseq is already bound. 
+  #
+  sub rl_bind_keyseq_if_unbound_in_map ( Str $keyseq, &callback ( Int, Int --> Int ), Keymap $map) returns Int
+    is native( LIB ) { ... }
+  # XXX needs method
 
   # Bind the key sequence represented by the string keyseq to the arbitrary
   # pointer data. type says what kind of data is pointed to by data; this can
