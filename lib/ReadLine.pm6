@@ -22,7 +22,9 @@ class ReadLine {
     method clone( Keymap $keymap ) {
       rl_copy_keymap( $keymap ) }
 
-    # Return a new keymap with the printing characters bound to rl_insert, the lowercase Meta characters bound to run their equivalents, and the Meta digits bound to produce numeric arguments. 
+    # Return a new keymap with the printing characters bound to rl_insert, the
+    # lowercase Meta characters bound to run their equivalents, and the Meta
+    # digits bound to produce numeric arguments. 
     #
     sub rl_make_keymap ( ) returns Keymap
       is native( LIB ) { ... }
