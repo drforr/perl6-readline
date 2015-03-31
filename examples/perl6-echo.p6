@@ -4,19 +4,11 @@ use ReadLine;
 
 my $readline = ReadLine.new;
 while my $response = $readline.readline( "prompt here (<cr> to exit)> " ) {
-  if $response ~~ /\S/ {
+  if $response ~~ /ding/ {
+    $readline.ding;
+  }
+  elsif $response ~~ /\S/ {
     $readline.add-history( $response );
   }
   say "[$response]";
 }
-
-#
-# Event loop version
-#
-# my $callback = sub( Str $input ) { $global ~= $input };
-#
-# $readline.rl_callback_handler_install( "New prompt> ", $callback );
-# my $running = 1;
-# while $running {
-#  select();
-# }
