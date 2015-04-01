@@ -5,6 +5,9 @@ constant LIB = 'libreadline.so.5';
 
 class ReadLine {
 
+  class ReadlineState is repr('CPointer' ) {
+  }
+
   class Keymap is repr('CPointer') {
     # Returns a new, empty keymap. The space for the keymap is allocated with
     # malloc(); the caller should free it by calling rl_free_keymap()
@@ -137,7 +140,7 @@ class ReadLine {
     rl_unbind_key_in_map( $key, $map ) }
 
   # Unbind all keys that execute function in map. 
-  sub rl_unbind_function_in_map (&calback ( Int, Int --> Int ), Keymap $map) returns Int
+  sub rl_unbind_function_in_map ( &callback ( Int, Int --> Int ), Keymap $map) returns Int
     is native( LIB ) { ... }
   # XXX need method
 
@@ -219,11 +222,11 @@ class ReadLine {
   #  is native( LIB ) { ... }
 
   # Return an array of strings representing the key sequences used to invoke function in the current keymap. 
-  #sub char ** rl_invoking_keyseqs (rl_command_func_t *function)
+  #sub char ** rl_invoking_keyseqs ( &callback ( Int, Int --> Int ) )
   #  is native( LIB ) { ... }
 
   # Return an array of strings representing the key sequences used to invoke function in the keymap map. 
-  #sub char ** rl_invoking_keyseqs_in_map (rl_command_func_t *function, Keymap $map)
+  #sub char ** rl_invoking_keyseqs_in_map ( &callback ( Int, Int --> Int ), Keymap $map)
   #  is native( LIB ) { ... }
 
   # Print the readline function names and the key sequences currently bound to them to rl_outstream. If readable is non-zero, the list is formatted in such a way that it can be made part of an inputrc file and re-read. 
@@ -238,13 +241,19 @@ class ReadLine {
   method list-funmap-names( ) {
     rl_list_funmap_names( ) }
 
-  # Return a NULL terminated array of known function names. The array is sorted. The array itself is allocated, but not the strings inside. You should free the array, but not the pointers, using free or rl_free when you are done. 
+  # Return a NULL terminated array of known function names. The array is sorted.
+  # The array itself is allocated, but not the strings inside. You should free
+  # the array, but not the pointers, using free or rl_free when you are done. 
+  #
   #sub const char ** rl_funmap_names ( )
   #  is native( LIB ) { ... }
 
-  # Add name to the list of bindable Readline command names, and make function the function to be called when name is invoked. 
-  #sub rl_add_funmap_entry ( Str $name, rl_command_func_t *function ) returns Int
-  #  is native( LIB ) { ... }
+  # Add name to the list of bindable Readline command names, and make function
+  # the function to be called when name is invoked. 
+  #
+  sub rl_add_funmap_entry ( Str $name, &callback ( Int, Int --> Int ) ) returns Int
+    is native( LIB ) { ... }
+  # XXX need method
 
   #
   # 2.4.5 Allowing Undoing
@@ -331,7 +340,7 @@ class ReadLine {
     rl_show_char( $c ) }
 
   # The arguments are a format string as would be supplied to printf, possibly containing conversion specifications such as `%d', and any additional arguments necessary to satisfy the conversion specifications. The resulting string is displayed in the echo area. The echo area is also used to display numeric arguments and search strings. You should call rl_save_prompt to save the prompt information before calling this function. 
-  #sub rl_message ( Str $msg, ...) returns Int
+  #sub rl_message ( Str $msg, ... ) returns Int
   #  is native( LIB ) { ... }
 
   # Clear the message in the echo area. If the prompt was saved with a call to rl_save_prompt before the last call to rl_message, call rl_restore_prompt before calling this function. 
@@ -477,12 +486,16 @@ class ReadLine {
   #
 
   # Save a snapshot of Readline's internal state to sp. The contents of the readline_state structure are documented in `readline.h'. The caller is responsible for allocating the structure. 
-  #sub rl_save_state (struct readline_state *sp) returns Int
-  #  is native( LIB ) { ... }
+  sub rl_save_state ( ReadlineState $sp ) returns Int
+    is native( LIB ) { ... }
+  method save-state( ReadlineState $sp ) {
+    rl_save_state( $sp ) }
 
   # Restore Readline's internal state to that stored in sp, which must have been saved by a call to rl_save_state. The contents of the readline_state structure are documented in `readline.h'. The caller is responsible for freeing the structure. 
-  #sub rl_restore_state (struct readline_state *sp) returns Int
-  #  is native( LIB ) { ... }
+  sub rl_restore_state ( ReadlineState $sp ) returns Int
+    is native( LIB ) { ... }
+  method restore-state( ReadlineState $sp ) {
+   rl_restore_state( $sp ) }
 
   # Deallocate the memory pointed to by mem. mem must have been allocated by malloc. 
   #sub rl_free (void *mem)
@@ -715,8 +728,8 @@ class ReadLine {
 
   # Returns the appropriate value to pass to rl_complete_internal() depending on whether cfunc was called twice in succession and the values of the show-all-if-ambiguous and show-all-if-unmodified variables. Application-specific completion functions may use this function to present the same interface as rl_complete(). 
   #
-  #sub rl_completion_mode (rl_command_func_t *cfunc) returns Int
-  #  is native( LIB ) { ... }
+  sub rl_completion_mode ( &callback ( Int, Int --> Int ) ) returns Int
+    is native( LIB ) { ... }
 
   # Returns an array of strings which is a list of completions for text. If there are no completions, returns NULL. The first entry in the returned array is the substitution for text. The remaining entries are the possible completions. The array is terminated with a NULL pointer.
   #
