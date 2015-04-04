@@ -1,8 +1,6 @@
 use v6;
 use NativeCall;
 
-#constant LIB = 'libreadline.so.5';
-
 class ReadLine {
   constant LIB = 'libreadline.so.5';
 
@@ -104,7 +102,8 @@ class ReadLine {
   #
   sub rl_bind_key ( Int $key, &callback ( Int, Int --> Int ) ) returns Int
     is native( LIB ) { * }
-  # XXX need method
+  method bind-key( Int $key, $callback ) {
+    rl_bind_key( $key, $callback ) }
 
   # Bind key to function in map. Returns non-zero in the case of an invalid
   # key. 
@@ -112,7 +111,8 @@ class ReadLine {
   sub rl_bind_key_in_map
     ( Int $key, &callback ( Int, Int --> Int ), Keymap $map ) returns Int
     is native( LIB ) { * }
-  # XXX need method
+  method bind-key-in-map( Int $key, $callback, Keymap $map ) {
+    rl_bind_key_in_map( $key, $callback, $map ) }
 
   # Binds key to function if it is not already bound in the currently active
   # keymap. Returns non-zero in the case of an invalid key or if key is already
@@ -121,7 +121,8 @@ class ReadLine {
   sub rl_bind_key_if_unbound ( Int $key, &callback ( Int, Int --> Int ) )
     returns Int
     is native( LIB ) { * }
-  # XXX need method
+  method bind-key-if-unbound( Int $key, $callback ) {
+    rl_bind_key_if_unbound( $key, $callback ) }
 
   # Binds key to function if it is not already bound in map. Returns non-zero
   # in the case of an invalid key or if key is already bound. 
@@ -129,7 +130,8 @@ class ReadLine {
   sub rl_bind_key_if_unbound_in_map
     ( Int $key, &callback ( Int, Int --> Int ), Keymap $map ) returns Int
     is native( LIB ) { * }
-  # XXX need method
+  method bind-key-if-unbound-in-map( Int $key, $callback, Keymap $map ) {
+    rl_bind_key_if_unbound_in_map( $key, $callback, $map ) }
 
   # Bind key to the null function in the currently active keymap. Returns
   # non-zero in case of error.
@@ -151,7 +153,8 @@ class ReadLine {
   sub rl_unbind_function_in_map ( &callback ( Int, Int --> Int ), Keymap $map)
     returns Int
     is native( LIB ) { * }
-  # XXX need method
+  method unbind-function-in-map( $callback, Keymap $map ) {
+    rl_unbind_function_in_map ( $callback, $map ) }
 
   # Unbind all keys that are bound to command in map.
   # 
@@ -167,7 +170,8 @@ class ReadLine {
   sub rl_bind_keyseq ( Str $keyseq, &callback ( Int, Int --> Int ) )
     returns Int
     is native( LIB ) { * }
-  # XXX need method
+  method bind-keyseq( Str $keyseq, $callback ) {
+    rl_bind_keyseq ( $keyseq, $callback ) }
 
   # Bind the key sequence represented by the string keyseq to the function
   # function. This makes new keymaps as necessary. Initial bindings are
@@ -176,14 +180,16 @@ class ReadLine {
   sub rl_bind_keyseq_in_map
     ( Str $keyseq, &callback ( Int, Int --> Int ), Keymap $map) returns Int
     is native( LIB ) { * }
-  # XXX needs method
+  method bind-keyseq-in-map( Str $keyseq, $callback, Keymap $map ) {
+    rl_bind_keyseq_in_map ( $keyseq, $callback, $map ) }
 
   # Equivalent to rl_bind_keyseq_in_map. 
   #
   sub rl_set_key ( Str $keyseq, &callback ( Int, Int --> Int ), Keymap $map )
     returns Int
     is native( LIB ) { * }
-  # XXX needs method
+  method set-key ( Str $keyseq, $callback, Keymap $map ) {
+    rl_set_key ( $keyseq, $callback, $map ) }
 
   # Binds keyseq to function if it is not already bound in the currently active
   # keymap. Returns non-zero in the case of an invalid keyseq or if keyseq is
@@ -192,7 +198,8 @@ class ReadLine {
   sub rl_bind_keyseq_if_unbound ( Str $keyseq, &callback ( Int, Int --> Int ) )
     returns Int
     is native( LIB ) { * }
-  # XXX needs method
+  method bind-keyseq-if-unbound( Str $keyseq, $callback ) {
+    rl_bind_keyseq_if_unbound ( $keyseq, $callback ) }
 
   # Binds keyseq to function if it is not already bound in map. Returns
   # non-zero in the case of an invalid keyseq or if keyseq is already bound. 
@@ -200,7 +207,8 @@ class ReadLine {
   sub rl_bind_keyseq_if_unbound_in_map
     ( Str $keyseq, &callback ( Int, Int --> Int ), Keymap $map) returns Int
     is native( LIB ) { * }
-  # XXX needs method
+  method bind-keyseq-if-unbound-in-map( Str $keyseq, $callback, Keymap $map ) {
+    rl_bind_keyseq_if_unbound_in_map ( $keyseq, $callback, $map ) }
 
   # Bind the key sequence represented by the string keyseq to the arbitrary
   # pointer data. type says what kind of data is pointed to by data; this can
@@ -287,7 +295,8 @@ class ReadLine {
   sub rl_add_funmap_entry ( Str $name, &callback ( Int, Int --> Int ) )
     returns Int
     is native( LIB ) { * }
-  # XXX need method
+  method add-funmap-entry( Str $name, $callback ) {
+    rl_add_funmap_entry ( $name, $callback ) }
 
   #
   # 2.4.5 Allowing Undoing
@@ -991,6 +1000,8 @@ class ReadLine {
   #
   sub rl_completion_mode ( &callback ( Int, Int --> Int ) ) returns Int
     is native( LIB ) { * }
+  method completion-mode( $callback ) {
+    rl_completion_mode( $callback ) }
 
   # Returns an array of strings which is a list of completions for text. If
   # there are no completions, returns NULL. The first entry in the returned
