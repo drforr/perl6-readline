@@ -4,6 +4,15 @@ use NativeCall;
 class ReadLine {
   my constant LIB = 'libreadline.so.5';
 
+  # Embedded typedefs here
+  #
+  class histdata_t is repr('CPointer') { } # typedef char *histdata_t;
+  class time_t is repr('CPointer') { } # XXX probably already a native type.
+  class Keymap is repr('CPointer') { } # typedef KEYMAP_ENTRY *Keymap;
+  class rl_vcpfunc_t is repr('CPointer') { } # typedef void rl_vcpfunc_t (char *);
+
+  class rl_command_func_t is repr('CPointer') { } #typedef int rl_command_func_t (int, int);
+
   constant meta_character_threshold = 0x07f; # Larger than this is Meta.
   constant meta_character_bit       = 0x080; # x0000000, must be on.
   constant largest_char             = 255;   # Largest character value.
@@ -24,11 +33,9 @@ class ReadLine {
   #
   # history.h -- the names of functions that you can call in history.
   #
-  class histdata_t is repr('CPointer') { } # typedef char *histdata_t;
 
   # The structure used to store a history entry.
   #
-  class _hist_entry is repr('CPointer') { } # is HIST_ENTRY
   class HIST_ENTRY is repr('CStruct') {
     has Str $.line;        # char *line;
     has Str $.timestamp;   # char *timestamp;
@@ -74,7 +81,7 @@ class ReadLine {
 
   # Set the state of the current history array to STATE.
   #
-  sub history_set_history_state( HISTORY_STATE $state )
+  sub history_set_history_state( HISTORY_STATE )
     is native( LIB ) { * }
   method history-set-history-state( HISTORY_STATE $state ) {
     history_set_history_state( $state ) }
@@ -84,7 +91,7 @@ class ReadLine {
   # Place STRING at the end of the history list.
   # The associated data field (if any) is set to NULL.
   #
-  sub add_history( Str $history )
+  sub add_history( Str )
     is native( LIB ) { * }
   method add-history( Str $history ) {
     add_history( $history ) }
@@ -92,7 +99,7 @@ class ReadLine {
   # Change the timestamp associated with the most recent history entry to
   # STRING.
   #
-  sub add_history_time( Str $timestamp )
+  sub add_history_time( Str )
     is native( LIB ) { * }
   method add-history-time( Str $timestamp ) {
     add_history_time( $timestamp ) }
@@ -101,7 +108,7 @@ class ReadLine {
   # is the magic number that tells us which element to delete.  The
   # elements are numbered from 0.
   #
-  sub remove_history( Int $which ) returns HIST_ENTRY
+  sub remove_history( Int ) returns HIST_ENTRY
     is native( LIB ) { * }
   method remove-history( Int $which ) returns HIST_ENTRY {
     remove_history( $which ) }
@@ -109,7 +116,7 @@ class ReadLine {
   # Free the history entry H and return any application-specific data
   # associated with it.
   #
-  sub free_history_entry( HIST_ENTRY $entry ) returns histdata_t
+  sub free_history_entry( HIST_ENTRY ) returns histdata_t
     is native( LIB ) { * }
   method free-history-entry( HIST_ENTRY $entry ) returns histdata_t {
     free_history_entry( $entry ) }
@@ -118,7 +125,7 @@ class ReadLine {
   # the old entry so you can dispose of the data.  In the case of an
   # invalid WHICH, a NULL pointer is returned.
   #
-  sub replace_history_entry( Int $which, Str $line, histdata_t $data )
+  sub replace_history_entry( Int, Str, histdata_t )
     returns HIST_ENTRY
     is native( LIB ) { * }
   method replace-history-entry( Int $which, Str $line, histdata_t $data )
@@ -134,7 +141,7 @@ class ReadLine {
 
   # Stifle the history list, remembering only MAX number of entries.
   #
-  sub stifle_history( Int $max )
+  sub stifle_history( Int )
     is native( LIB ) { * }
   method stifle-history( Int $max ) {
     stifle_history( $max ) }
@@ -160,7 +167,11 @@ class ReadLine {
   # Return a NULL terminated array of HIST_ENTRY which is the current input
   # history.  Element 0 of this list is the beginning of time.  If there
   # is no history, return NULL.
-  #extern HIST_ENTRY **history_list (void);
+  #
+  sub history_list( ) returns CArray[HIST_ENTRY]
+    is native( LIB ) { * }
+  method history-list( ) returns CArray[HIST_ENTRY] {
+    history_list() }
 
   # Returns the number which says what history element we are now
   # looking at.
@@ -173,7 +184,7 @@ class ReadLine {
   # Return the history entry at the current position, as determined by
   # history_offset.  If there is no entry there, return a NULL pointer.
   #
-  sub current_history( Int $which ) returns HIST_ENTRY
+  sub current_history( Int ) returns HIST_ENTRY
     is native( LIB ) { * }
   method current-history( Int $which ) returns HIST_ENTRY {
     current_history( $which ) }
@@ -181,12 +192,10 @@ class ReadLine {
   # Return the history entry which is logically at OFFSET in the history
   # array.  OFFSET is relative to history_base.
   #
-  sub history_get( Int $which ) returns HIST_ENTRY
+  sub history_get( Int ) returns HIST_ENTRY
     is native( LIB ) { * }
   method history-get( Int $which ) returns HIST_ENTRY {
     history_get( $which ) }
-
-  class time_t is repr('CPointer') { } # XXX probably already a native type.
 
   # Return the timestamp associated with the HIST_ENTRY * passed as an
   # argument.
@@ -208,7 +217,7 @@ class ReadLine {
   #
   # Set the position in the history list to POS.
   #
-  sub history_set_pos( Int $pos ) returns Int
+  sub history_set_pos( Int ) returns Int
     is native( LIB ) { * }
   method history-set-pos( Int $pos ) returns Int {
     history_set_pos( $pos ) }
@@ -240,7 +249,7 @@ class ReadLine {
   # is the offset in the line of that history entry that the string was
   # found in.  Otherwise, nothing is changed, and a -1 is returned.
   #
-  sub history_search( Str $text, Int $pos ) returns Int
+  sub history_search( Str, Int ) returns Int
     is native( LIB ) { * }
   method history-search( Str $text, Int $pos ) returns Int {
     history_search( $text, $pos ) }
@@ -249,7 +258,7 @@ class ReadLine {
   # The search is anchored: matching lines must begin with string.
   # DIRECTION is as in history_search().
   #
-  sub history_search_prefix( Str $text, Int $pos ) returns Int
+  sub history_search_prefix( Str, Int ) returns Int
     is native( LIB ) { * }
   method history-search-prefix( Str $text, Int $pos ) returns Int {
     history_search_prefix( $text, $pos ) }
@@ -260,7 +269,7 @@ class ReadLine {
   # Returns the absolute index of the history element where STRING
   # was found, or -1 otherwise.
   #
-  sub history_search_pos( Str $text, Int $pos, Int $dir ) returns Int
+  sub history_search_pos( Str, Int, Int ) returns Int
     is native( LIB ) { * }
   method history-search-pos( Str $text, Int $pos, Int $dir ) returns Int {
     history_search_pos( $text, $pos, $dir ) }
@@ -271,7 +280,7 @@ class ReadLine {
   # If FILENAME is NULL, then read from ~/.history.  Returns 0 if
   # successful, or errno if not.
   #
-  sub read_history( Str $text ) returns Int
+  sub read_history( Str ) returns Int
     is native( LIB ) { * }
   method read-history( Str $text ) returns Int {
     my $rv = read_history( $text );
@@ -283,7 +292,7 @@ class ReadLine {
   # until the end of the file.  If FILENAME is NULL, then read from
   # ~/.history.  Returns 0 if successful, or errno if not.
   #
-  sub read_history_range( Str $text, Int $from, Int $to ) returns Int
+  sub read_history_range( Str, Int, Int ) returns Int
     is native( LIB ) { * }
   method read-history-range( Str $text, Int $from, Int $to ) returns Int {
     read_history_range( $text, $from, $to ) }
@@ -292,7 +301,7 @@ class ReadLine {
   # then write the history list to ~/.history.  Values returned
   # are as in read_history ().
   #
-  sub write_history( Str $filename ) returns Int
+  sub write_history( Str ) returns Int
     is native( LIB ) { * }
   method write-history( Str $filename ) returns Int {
     my $rv = write_history( $filename );
@@ -301,14 +310,14 @@ class ReadLine {
   # Append NELEMENT entries to FILENAME.  The entries appended are from
   # the end of the list minus NELEMENTs up to the end of the list.
   #
-  sub append_history( Int $offset, Str $filename ) returns Int
+  sub append_history( Int, Str ) returns Int
     is native( LIB ) { * }
   method append-history( Int $offset, Str $filename ) returns Int {
     append_history( $offset, $filename ) }
 
   # Truncate the history file, leaving only the last NLINES lines.
   #
-  sub history_truncate_file( Str $filename, Int $lines ) returns Int
+  sub history_truncate_file( Str, Int ) returns Int
     is native( LIB ) { * }
   method history-truncate-file( Str $filename, Int $lines ) returns Int {
     my $rv = history_truncate_file( $filename, $lines );
@@ -329,13 +338,19 @@ class ReadLine {
   # If an error occurred in expansion, then OUTPUT contains a descriptive
   # error message.
   #
-  #extern int history_expand (char *, char **);
+
+# XXX Bug in type signatures?
+#
+#  sub history_expand( Str, Pointer[Str] ) returns Int
+#    is native( LIB ) { * }
+#  method history-expand( Str $string, Pointer[Str] $output ) returns Int {
+#    history_expand( $string, $output ) }
 
   # Extract a string segment consisting of the FIRST through LAST
   # arguments present in STRING.  Arguments are broken up as in
   # the shell.
   #
-  sub history_arg_extract( Int $first, Int $last, Str $string ) returns Str
+  sub history_arg_extract( Int, Int, Str ) returns Str
     is native( LIB ) { * }
   method history-arg-extract( Int $first, Int $last, Str $string ) returns Str {
     history_arg_extract( $first, $last, $string ) }
@@ -347,12 +362,22 @@ class ReadLine {
   # specification for what to search for in addition to the normal
   # characters `:', ` ', `\t', `\n', and sometimes `?'.
   #
-  #extern char *get_history_event (const char *, int *, int);
+
+# XXX Bug in type signatures?
+#
+#  sub get_history_event( Str, Pointer[Int], Int ) returns Str
+#    is native( LIB ) { * }
+#  method get-history-event( Str $string, Pointer[Int] $index, Int $delimiting-quote ) returns Str {
+#    get_history_event( $string, $index, $delimiting-quote ) }
+
 
   # Return an array of tokens, much as the shell might.  The tokens are
   # parsed out of STRING.
   #
-  #extern char **history_tokenize (const char *);
+  sub history_tokenize( Str ) returns CArray[Str]
+    is native( LIB ) { * }
+  method history-tokenize( Str $string ) returns CArray[Str] {
+    history_tokenize( $string ) }
 
   # Exported history variables.
   #extern int history_base;
@@ -388,9 +413,7 @@ class ReadLine {
   # address of a keymap to indirect through.
   # TYPE says which kind of thing FUNCTION is.
   #
-  class rl_command_func_t is repr('CPointer') { } #typedef int rl_command_func_t (int, int);
 
-  class _keymap_entry is repr('CPointer') { } # is KEYMAP_ENTRY
   class KEYMAP_ENTRY is repr('CStruct') {
     has byte              $.type;     # char type;
     has rl_command_func_t $.function; # rl_command_func_t *function
@@ -404,7 +427,6 @@ class ReadLine {
   constant ANYOTHERKEY = KEYMAP_SIZE - 1;
 
   #typedef KEYMAP_ENTRY KEYMAP_ENTRY_ARRAY[KEYMAP_SIZE];
-  class Keymap is repr('CPointer') { } #typedef KEYMAP_ENTRY *Keymap;
   #
   # The values that TYPE can have in a keymap entry.
   #
@@ -505,13 +527,12 @@ class ReadLine {
 
   # What an element of THE_UNDO_LIST looks like.
   #
-  class undo_list is repr('CPointer') { } # is a UNDO_LIST
   class UNDO_LIST is repr('CStruct') {
-    has Pointer $.next; # struct undo_list *next;
-    has int $.start;    # int start; # Where the change took place.
-    has int $.end;      # int end;
-    has Str $.text;     # char *text; # The text to insert, if undoing a delete
-    has byte $.what;    # enum undo_code what; # Delete, Insert, Begin, End.
+    has UNDO_LIST $.next; # struct undo_list *next;
+    has int $.start;      # int start; # Where the change took place.
+    has int $.end;        # int end;
+    has Str $.text;       # char *text; # The text to insert, if undoing a delete
+    has byte $.what;      # enum undo_code what; # Delete, Insert, Begin, End.
   }
 
   # The current undo list for RL_LINE_BUFFER.
@@ -520,7 +541,6 @@ class ReadLine {
 
   # The data structure for mapping textual names to code addresses.
   #
-  class _funmap is repr('CPointer') { } # is a FUNMAP
   class FUNMAP is repr('CStruct') {
     has Str     $.name;     # const char *name;
     has Pointer $.function; # rl_command_func_t *function;
@@ -692,7 +712,6 @@ class ReadLine {
 
   # Not available unless READLINE_CALLBACKS is defined.
   #
-  class rl_vcpfunc_t is repr('CPointer') { } #typedef void rl_vcpfunc_t (char *);
 
   sub rl_callback_handler_install( Str, rl_vcpfunc_t )
     is native( LIB ) { * }
@@ -759,14 +778,19 @@ class ReadLine {
   method rl-vi-check( ) returns Int {
     rl_vi_check() }
 
-  #extern int rl_vi_domove (int, int *);
+# XXX Bug in type signatures?
+#
+#  sub rl_vi_domove( Int, Pointer[Int] ) returns Int
+#    is native( LIB ) { * }
+#  method rl-vi-domove( Int $i, Pointer[Int] $pi ) returns Int {
+#    rl_vi_domove( $i, $pi ) }
 
-  sub rl_vi_bracktype( Int $t ) returns Int
+  sub rl_vi_bracktype( Int ) returns Int
     is native( LIB ) { * }
   method rl-vi-bracktype( Int $t ) returns Int {
     rl_vi_bracktype( $t ) }
 
-  sub rl_vi_start_inserting( Int $t, Int $u, Int $v ) returns Int
+  sub rl_vi_start_inserting( Int, Int, Int ) returns Int
     is native( LIB ) { * }
   method rl-vi-start-inserting( Int $t, Int $u, Int $v ) returns Int {
     rl_vi_start_inserting( $t, $u, $v ) }
@@ -790,17 +814,17 @@ class ReadLine {
   #
   # Read a line of input.  Prompt with PROMPT.  A NULL PROMPT means none.
   #
-  sub readline( Str $prompt ) returns Str
+  sub readline( Str ) returns Str
     is native( LIB ) { * }
   method readline( Str $prompt ) returns Str {
     readline( $prompt ) }
 
-  sub rl_set_prompt( Str $prompt ) returns Int
+  sub rl_set_prompt( Str ) returns Int
     is native( LIB ) { * }
   method rl-set-prompt( Str $prompt ) returns Int {
     rl_set_prompt( $prompt ) }
 
-  sub rl_expand_prompt( Str $prompt ) returns Int
+  sub rl_expand_prompt( Str ) returns Int
     is native( LIB ) { * }
   method rl-expand-prompt( Str $prompt ) returns Int {
     rl_expand_prompt( $prompt ) }
@@ -887,12 +911,12 @@ class ReadLine {
   method rl-add-defun( Str $str, rl_command_func_t $cb, Int $i ) returns Int {
     rl_add_defun( $str, $cb, $i ) }
 
-  sub rl_variable_value( Str $s ) returns Str
+  sub rl_variable_value( Str ) returns Str
     is native( LIB ) { * }
   method rl-variable-value( Str $s ) returns Str {
     rl_variable_value( $s ) }
 
-  sub rl_variable_bind( Str $s, Str $t ) returns Int
+  sub rl_variable_bind( Str, Str ) returns Int
     is native( LIB ) { * }
   method rl-variable-bind( Str $s, Str $t ) returns Int {
     rl_variable_bind( $s, $t ) }
@@ -912,39 +936,72 @@ class ReadLine {
   method rl-macro-bind( Str $str, Str $b, Keymap $k ) returns Int {
     rl_macro_bind( $str, $b, $k ) }
 
-  # Undocumented in the texinfo manual; not really useful to programs.
-  #
-  #extern int rl_translate_keyseq (const char *, char *, int *);
-  #extern char *rl_untranslate_keyseq (int);
+# XXX Bug in type signatures?
+#
+#  sub rl_translate_keyseq( Str, Str, Pointer[Int] ) returns Int
+#    is native( LIB ) { * }
+#  method rl-translate-keyseq( Str $str, Str $b, Pointer[Int] $k ) returns Int {
+#    rl_translate_keyseq( $str, $b, $k ) }
 
-  #extern rl_command_func_t *rl_named_function (const char *);
-  #extern rl_command_func_t *rl_function_of_keyseq (const char *, Keymap, int *);
+  sub rl_untranslate_keyseq( Int ) returns Int
+    is native( LIB ) { * }
+  method rl-untranslate-keyseq( Int $i ) returns Int {
+    rl_untranslate_keyseq( $i ) }
 
-  #extern void rl_list_funmap_names (void);
-  #extern char **rl_invoking_keyseqs_in_map (rl_command_func_t *, Keymap);
-  #extern char **rl_invoking_keyseqs (rl_command_func_t *);
+  sub rl_named_function( Str ) returns rl_command_func_t
+    is native( LIB ) { * }
+  method rl-named-function( Str $s ) returns rl_command_func_t {
+    rl_named_function( $s ) }
 
-  sub rl_function_dumper( Int $i )
+# XXX Bug in type signatures?
+#
+#  sub rl_function_of_keyseq( Str, Keymap, Pointer[Int] )
+#    returns rl_command_func_t
+#    is native( LIB ) { * }
+#  method rl-function-of-keyseq( Str $s, Keymap $k, Pointer[Int] $p )
+#    returns rl_command_func_t {
+#      rl_function_of_keyseq( $s, $k, $p ) }
+
+  sub rl_list_funmap_names( )
+    is native( LIB ) { * }
+  method rl-list-funmap-names( ) {
+    rl_list_funmap_names( ) }
+
+  sub rl_invoking_keyseqs_in_map( rl_command_func_t, Keymap )
+    returns CArray[Str]
+      is native( LIB ) { * }
+  method rl-invoking-keyseqs-in-map( rl_command_func_t $cb, Keymap $k )
+    returns CArray[Str] {
+      rl_invoking_keyseqs_in_map( $cb, $k ) }
+
+# XXX Bug in type signatures?
+#
+#  sub rl_invoking_keyseqs( rl_command_func_t ) returns CArray[Str]
+#    is native( LIB ) { * }
+#  method rl-invoking-keyseqs( rl_command_func_t $cb ) returns CArray[Str] {
+#    rl_invoking_keyseqs_in_map( $cb ) }
+
+  sub rl_function_dumper( Int )
     is native( LIB ) { * }
   method rl-function-dumper( Int $i ) {
     rl_function_dumper( $i ) }
 
-  sub rl_macro_dumper( Int $i )
+  sub rl_macro_dumper( Int )
     is native( LIB ) { * }
   method rl-macro-dumper( Int $i ) {
     rl_macro_dumper( $i ) }
 
-  sub rl_variable_dumper( Int $i )
+  sub rl_variable_dumper( Int )
     is native( LIB ) { * }
   method rl-variable-dumper( Int $i ) {
     rl_variable_dumper( $i ) }
 
-  sub rl_read_init_file( Str $name )
+  sub rl_read_init_file( Str )
     is native( LIB ) { * }
   method rl-read-init-file( Str $name ) {
     rl_read_init_file( $name ) }
 
-  sub rl_parse_and_bind( Str $name ) returns Int
+  sub rl_parse_and_bind( Str ) returns Int
     is native( LIB ) { * }
   method rl-parse-and-bind( Str $name ) returns Int {
     rl_parse_and_bind( $name ) }
@@ -957,7 +1014,7 @@ class ReadLine {
 
   # Utility functions for managing keyboard macros.
   #
-  sub rl_push_macro_input( Str $name )
+  sub rl_push_macro_input( Str )
     is native( LIB ) { * }
   method rl-push-macro-input( Str $name ) {
     rl_push_macro_input( $name ) }
@@ -986,7 +1043,7 @@ class ReadLine {
   method rl-end-undo-group( ) returns Int {
     rl_end_undo_group( ) }
 
-  sub rl_modifying( Int $i, Int $j ) returns Int
+  sub rl_modifying( Int, Int ) returns Int
     is native( LIB ) { * }
   method rl-modifying( Int $i, Int $j ) returns Int {
     rl_modifying( $i, $j ) }
@@ -1030,14 +1087,14 @@ class ReadLine {
 
   #extern int rl_message (const char *, ...)  __rl_attribute__((__format__ (printf, 1, 2));
 
-  sub rl_show_char( Int $c ) returns Int
+  sub rl_show_char( Int ) returns Int
     is native( LIB ) { * }
   method rl-show-char( Int $c ) returns Int {
     rl_show_char( $c ) }
 
   # Undocumented in texinfo manual.
   #
-  sub rl_character_len( Int $c, Int $d ) returns Int
+  sub rl_character_len( Int, Int ) returns Int
     is native( LIB ) { * }
   method rl-character-len( Int $c, Int $d ) returns Int {
     rl_character_len( $c, $d ) }
@@ -1056,27 +1113,27 @@ class ReadLine {
 
   # Modifying text.
   #
-  sub rl_replace_line( Str $text, Int $i )
+  sub rl_replace_line( Str, Int )
     is native( LIB ) { * }
   method rl-replace-line( Str $text, Int $i ) {
     rl_replace_line( $text, $i ) }
 
-  sub rl_insert_text( Str $text ) returns Int
+  sub rl_insert_text( Str ) returns Int
     is native( LIB ) { * }
   method rl-insert-text( Str $text ) returns Int {
     rl_insert_text( $text ) }
 
-  sub rl_delete_text( Int $a, Int $b ) returns Int
+  sub rl_delete_text( Int, Int ) returns Int
     is native( LIB ) { * }
   method rl-delete-text( Int $a, Int $b ) returns Int {
     rl_delete_text( $a, $b ) }
 
-  sub rl_kill_text( Int $a, Int $b ) returns Int
+  sub rl_kill_text( Int, Int ) returns Int
     is native( LIB ) { * }
   method rl-kill-text( Int $a, Int $b ) returns Int {
     rl_kill_text( $a, $b ) }
 
-  sub rl_copy_text( Int $a, Int $b ) returns Str
+  sub rl_copy_text( Int, Int ) returns Str
     is native( LIB ) { * }
   method rl-copy-text( Int $a, Int $b ) returns Str {
     rl_copy_text( $a, $b ) }
@@ -1103,13 +1160,34 @@ class ReadLine {
   method rl-tty-unset-default-bindings( Keymap $k ) {
     rl_tty_unset_default_bindings ( $k ) }
 
-  #extern int rl_reset_terminal (const char *);
-  #extern void rl_resize_terminal (void);
-  #extern void rl_set_screen_size (int, int);
-  #extern void rl_get_screen_size (int *, int *);
-  #extern void rl_reset_screen_size (void);
+  sub rl_reset_terminal( Str ) returns Int
+    is native( LIB ) { * }
+  method rl-reset-terminal( Str $s ) returns Int {
+    rl_reset_terminal( $s ) }
 
-  sub rl_get_termcap( Str $c ) returns Str
+  sub rl_resize_terminal( )
+    is native( LIB ) { * }
+  method rl-resize-terminal( ) {
+    rl_resize_terminal( ) }
+
+  sub rl_set_screen_size( Int, Int )
+    is native( LIB ) { * }
+  method rl-set-screen-size( Int $r, Int $c ) {
+    rl_set_screen_size( $r, $c ) }
+
+# XXX Bug in type signatures?
+#
+#  sub rl_get_screen_size( Pointer[Int], Pointer[Int] )
+#    is native( LIB ) { * }
+#  method rl-get-screen-size( Pointer[Int] $r, Pointer[Int] $c ) {
+#    rl_get_screen_size( $r, $c ) }
+
+  sub rl_reset_screen_size( )
+    is native( LIB ) { * }
+  method rl-reset-screen-size( ) {
+    rl_reset_screen_size( ) }
+
+  sub rl_get_termcap( Str ) returns Str
     is native( LIB ) { * }
   method rl-get-termcap( Str $c ) returns Str {
     rl_get_termcap( $c ) }
@@ -1125,7 +1203,7 @@ class ReadLine {
 
   # `Public' utility functions.
   #
-  sub rl_extend_line_buffer( Int $c )
+  sub rl_extend_line_buffer( Int )
     is native( LIB ) { * }
   method rl-extend-line-buffer( Int $c ) {
     rl_extend_line_buffer( $c ) }
@@ -1135,12 +1213,12 @@ class ReadLine {
   method rl-ding( ) returns Int {
     rl_ding( ) }
 
-  sub rl_alphabetic( Int $c ) returns Int
+  sub rl_alphabetic( Int ) returns Int
     is native( LIB ) { * }
   method rl-alphabetic( Int $c ) returns Int {
     rl_alphabetic( $c ) }
 
-  sub rl_free( Pointer $p )
+  sub rl_free( Pointer )
     is native( LIB ) { * }
   method rl-free( Pointer $p ) {
     rl_free( $p ) }
@@ -1172,12 +1250,12 @@ class ReadLine {
   method rl-free-line-state( ) {
     rl_free_line_state( ) }
 
-  sub rl_echo_signal( Int $c )
+  sub rl_echo_signal( Int )
     is native( LIB ) { * }
   method rl-echo-signal( Int $c ) {
     rl_echo_signal( $c ) }
 
-  sub rl_set_paren_blink_timeout( Int $c ) returns Int
+  sub rl_set_paren_blink_timeout( Int ) returns Int
     is native( LIB ) { * }
   method rl-set-paren-blink-timeout( Int $c ) returns Int {
     rl_set_paren_blink_timeout( $c ) }
@@ -1191,7 +1269,10 @@ class ReadLine {
   #extern char *rl_username_completion_function (const char *, int);
   #extern char *rl_filename_completion_function (const char *, int);
 
-  #extern int rl_completion_mode (rl_command_func_t *);
+  sub rl_completion_mode( rl_command_func_t ) returns Int
+    is native( LIB ) { * }
+  method rl-completion-mode( rl_command_func_t $cb ) returns Int {
+    rl_completion_mode( $cb ) }
 
   ############################################################
   #  							     #
@@ -1703,12 +1784,12 @@ class ReadLine {
     has int $.reserved; # char reserved[64]; # XXX
   }
 
-  sub rl_save_state( readline_state $state ) returns Int
+  sub rl_save_state( readline_state ) returns Int
     is native( LIB ) { * }
   method rl-save-state( readline_state $state ) returns Int {
     rl_save_state( $state ) }
 
-  sub rl_restore_state( readline_state $state ) returns Int
+  sub rl_restore_state( readline_state ) returns Int
     is native( LIB ) { * }
   method rl-restore-state( readline_state $state ) returns Int {
     rl_restore_state( $state ) }
@@ -1717,10 +1798,6 @@ class ReadLine {
   #
   # rltypedefs.h -- Type declarations for readline functions. */
   #
-  # Bindable functions
-  #
-  #typedef int rl_command_func_t (int, int);
-
   # Typedefs for the completion system
   #
   #typedef char *rl_compentry_func_t (const char *, int);
@@ -1798,7 +1875,7 @@ class ReadLine {
 
   # Return a new string which is the result of tilde expanding STRING.
   #
-  sub tilde_expand( Str $filename ) returns Str
+  sub tilde_expand( Str ) returns Str
     is native( LIB ) { * }
   method tilde-expand( Str $filename ) returns Str {
     tilde_expand( $filename ) }
@@ -1806,7 +1883,7 @@ class ReadLine {
   # Do the work of tilde expansion on FILENAME.  FILENAME starts with a
   # tilde.  If there is no expansion, call tilde_expansion_failure_hook.
   #
-  sub tilde_expand_word( Str $filename ) returns Str
+  sub tilde_expand_word( Str ) returns Str
     is native( LIB ) { * }
   method tilde-expand-word( Str $filename ) returns Str {
     tilde_expand_word( $filename ) }
