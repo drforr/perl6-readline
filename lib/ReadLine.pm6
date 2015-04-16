@@ -24,14 +24,15 @@ class ReadLine {
   #
   # history.h -- the names of functions that you can call in history.
   #
-  #typedef char *histdata_t;
-  #
+  class histdata_t is repr('CPointer') { } # typedef char *histdata_t;
+
   # The structure used to store a history entry.
-  # typedef struct _hist_entry { ... } HIST_ENTRY
+  #
+  class _hist_entry is repr('CPointer') { } # is HIST_ENTRY
   class HIST_ENTRY is repr('CStruct') {
-    has Str $.line;      # char *line;
-    has Str $.timestamp; # char *timestamp;
-    has Str $.data;      # histdata_t data;
+    has Str $.line;        # char *line;
+    has Str $.timestamp;   # char *timestamp;
+    has histdata_t $.data; # histdata_t data;
   }
 
   # Size of the history-library-managed space in history entry HS.
@@ -64,13 +65,21 @@ class ReadLine {
   method using-history( ) {
     using_history() }
 
-  #/* Return the current HISTORY_STATE of the history. */
-  #extern HISTORY_STATE *history_get_history_state (void);
+  # Return the current HISTORY_STATE of the history.
   #
-  #/* Set the state of the current history array to STATE. */
-  #extern void history_set_history_state (HISTORY_STATE *);
+  sub history_get_history_state( ) returns HISTORY_STATE
+    is native( LIB ) { * }
+  method history-get-history-state( ) returns HISTORY_STATE {
+    history_get_history_state() }
+
+  # Set the state of the current history array to STATE.
   #
-  #/* Manage the history list. */
+  sub history_set_history_state( HISTORY_STATE $state )
+    is native( LIB ) { * }
+  method history-set-history-state( HISTORY_STATE $state ) {
+    history_set_history_state( $state ) }
+
+  # Manage the history list.
   #
   # Place STRING at the end of the history list.
   # The associated data field (if any) is set to NULL.
@@ -88,19 +97,33 @@ class ReadLine {
   method add-history-time( Str $timestamp ) {
     add_history_time( $timestamp ) }
 
-  #/* A reasonably useless function, only here for completeness.  WHICH
-  #   is the magic number that tells us which element to delete.  The
-  #   elements are numbered from 0. */
-  #extern HIST_ENTRY *remove_history (int);
+  # A reasonably useless function, only here for completeness.  WHICH
+  # is the magic number that tells us which element to delete.  The
+  # elements are numbered from 0.
   #
-  #/* Free the history entry H and return any application-specific data
-  #   associated with it. */
-  #extern histdata_t free_history_entry (HIST_ENTRY *);
+  sub remove_history( Int $which ) returns HIST_ENTRY
+    is native( LIB ) { * }
+  method remove-history( Int $which ) returns HIST_ENTRY {
+    remove_history( $which ) }
+
+  # Free the history entry H and return any application-specific data
+  # associated with it.
   #
-  #/* Make the history entry at WHICH have LINE and DATA.  This returns
-  #   the old entry so you can dispose of the data.  In the case of an
-  #   invalid WHICH, a NULL pointer is returned. */
-  #extern HIST_ENTRY *replace_history_entry (int, const char *, histdata_t);
+  sub free_history_entry( HIST_ENTRY $entry ) returns histdata_t
+    is native( LIB ) { * }
+  method free-history-entry( HIST_ENTRY $entry ) returns histdata_t {
+    free_history_entry( $entry ) }
+
+  # Make the history entry at WHICH have LINE and DATA.  This returns
+  # the old entry so you can dispose of the data.  In the case of an
+  # invalid WHICH, a NULL pointer is returned.
+  #
+  sub replace_history_entry( Int $which, Str $line, histdata_t $data )
+    returns HIST_ENTRY
+    is native( LIB ) { * }
+  method replace-history-entry( Int $which, Str $line, histdata_t $data )
+    returns HIST_ENTRY {
+      replace_history_entry( $which, $line, $data ) }
 
   # Clear the history list and start over.
   #
@@ -118,7 +141,7 @@ class ReadLine {
 
   # Stop stifling the history.  This returns the previous amount the
   # history was stifled by.  The value is positive if the history was
-  # stifled, negative if it wasn't. */
+  # stifled, negative if it wasn't.
   #
   sub unstifle_history( )
     is native( LIB ) { * }
@@ -134,11 +157,11 @@ class ReadLine {
 
   # Information about the history list.
   #
-  #/* Return a NULL terminated array of HIST_ENTRY which is the current input
-  #   history.  Element 0 of this list is the beginning of time.  If there
-  #   is no history, return NULL. */
+  # Return a NULL terminated array of HIST_ENTRY which is the current input
+  # history.  Element 0 of this list is the beginning of time.  If there
+  # is no history, return NULL.
   #extern HIST_ENTRY **history_list (void);
-  #
+
   # Returns the number which says what history element we are now
   # looking at.
   #  
@@ -147,18 +170,32 @@ class ReadLine {
   method where-history( ) returns Int {
     where_history() }
 
-  #/* Return the history entry at the current position, as determined by
-  #   history_offset.  If there is no entry there, return a NULL pointer. */
-  #extern HIST_ENTRY *current_history (void);
+  # Return the history entry at the current position, as determined by
+  # history_offset.  If there is no entry there, return a NULL pointer.
   #
-  #/* Return the history entry which is logically at OFFSET in the history
-  #   array.  OFFSET is relative to history_base. */
-  #extern HIST_ENTRY *history_get (int);
+  sub current_history( Int $which ) returns HIST_ENTRY
+    is native( LIB ) { * }
+  method current-history( Int $which ) returns HIST_ENTRY {
+    current_history( $which ) }
+
+  # Return the history entry which is logically at OFFSET in the history
+  # array.  OFFSET is relative to history_base.
   #
-  #/* Return the timestamp associated with the HIST_ENTRY * passed as an
-  #   argument */
-  #extern time_t history_get_time (HIST_ENTRY *);
+  sub history_get( Int $which ) returns HIST_ENTRY
+    is native( LIB ) { * }
+  method history-get( Int $which ) returns HIST_ENTRY {
+    history_get( $which ) }
+
+  class time_t is repr('CPointer') { } # XXX probably already a native type.
+
+  # Return the timestamp associated with the HIST_ENTRY * passed as an
+  # argument.
   #
+  sub history_get_time( HIST_ENTRY ) returns time_t
+    is native( LIB ) { * }
+  method history-get-time( HIST_ENTRY $h ) returns time_t {
+    history_get_time( $h ) }
+
   # Return the number of bytes that the primary history entries are using.
   # This just adds up the lengths of the_history->lines.
   #
@@ -176,15 +213,23 @@ class ReadLine {
   method history-set-pos( Int $pos ) returns Int {
     history_set_pos( $pos ) }
 
-  #/* Back up history_offset to the previous history entry, and return
-  #   a pointer to that entry.  If there is no previous entry, return
-  #   a NULL pointer. */
-  #extern HIST_ENTRY *previous_history (void);
+  # Back up history_offset to the previous history entry, and return
+  # a pointer to that entry.  If there is no previous entry, return
+  # a NULL pointer.
   #
-  #/* Move history_offset forward to the next item in the input_history,
-  #   and return the a pointer to that entry.  If there is no next entry,
-  #   return a NULL pointer. */
-  #extern HIST_ENTRY *next_history (void);
+  sub previous_history( ) returns HIST_ENTRY
+    is native( LIB ) { * }
+  method previous-history( ) returns HIST_ENTRY {
+    previous_history( ) }
+
+  # Move history_offset forward to the next item in the input_history,
+  # and return the a pointer to that entry.  If there is no next entry,
+  # return a NULL pointer.
+  #
+  sub next_history( ) returns HIST_ENTRY
+    is native( LIB ) { * }
+  method next-history( ) returns HIST_ENTRY {
+    next_history( ) }
 
   # Searching the history list.
   #
@@ -220,15 +265,15 @@ class ReadLine {
   method history-search-pos( Str $text, Int $pos, Int $dir ) returns Int {
     history_search_pos( $text, $pos, $dir ) }
 
-  #/* Managing the history file. */
+  # Managing the history file.
   #
-  #/* Add the contents of FILENAME to the history list, a line at a time.
-  #   If FILENAME is NULL, then read from ~/.history.  Returns 0 if
-  #   successful, or errno if not. */
+  # Add the contents of FILENAME to the history list, a line at a time.
+  # If FILENAME is NULL, then read from ~/.history.  Returns 0 if
+  # successful, or errno if not.
   #
   sub read_history( Str $text ) returns Int
     is native( LIB ) { * }
-  method read-history( Str $text ) {
+  method read-history( Str $text ) returns Int {
     my $rv = read_history( $text );
     $rv == 0 ?? True !! $rv }
 
@@ -271,38 +316,45 @@ class ReadLine {
 
   # History expansion.
   #
-  #/* Expand the string STRING, placing the result into OUTPUT, a pointer
-  #   to a string.  Returns:
+  # Expand the string STRING, placing the result into OUTPUT, a pointer
+  # to a string.  Returns:
   #
-  #   0) If no expansions took place (or, if the only change in
-  #      the text was the de-slashifying of the history expansion
-  #      character)
-  #   1) If expansions did take place
-  #  -1) If there was an error in expansion.
-  #   2) If the returned line should just be printed.
+  # 0) If no expansions took place (or, if the only change in
+  #    the text was the de-slashifying of the history expansion
+  #    character)
+  # 1) If expansions did take place
+  #-1) If there was an error in expansion.
+  # 2) If the returned line should just be printed.
   #
-  #  If an error occurred in expansion, then OUTPUT contains a descriptive
-  #  error message. */
+  # If an error occurred in expansion, then OUTPUT contains a descriptive
+  # error message.
+  #
   #extern int history_expand (char *, char **);
+
+  # Extract a string segment consisting of the FIRST through LAST
+  # arguments present in STRING.  Arguments are broken up as in
+  # the shell.
   #
-  #/* Extract a string segment consisting of the FIRST through LAST
-  #   arguments present in STRING.  Arguments are broken up as in
-  #   the shell. */
-  #extern char *history_arg_extract (int, int, const char *);
+  sub history_arg_extract( Int $first, Int $last, Str $string ) returns Str
+    is native( LIB ) { * }
+  method history-arg-extract( Int $first, Int $last, Str $string ) returns Str {
+    history_arg_extract( $first, $last, $string ) }
+
+  # Return the text of the history event beginning at the current
+  # offset into STRING.  Pass STRING with *INDEX equal to the
+  # history_expansion_char that begins this specification.
+  # DELIMITING_QUOTE is a character that is allowed to end the string
+  # specification for what to search for in addition to the normal
+  # characters `:', ` ', `\t', `\n', and sometimes `?'.
   #
-  #/* Return the text of the history event beginning at the current
-  #   offset into STRING.  Pass STRING with *INDEX equal to the
-  #   history_expansion_char that begins this specification.
-  #   DELIMITING_QUOTE is a character that is allowed to end the string
-  #   specification for what to search for in addition to the normal
-  #   characters `:', ` ', `\t', `\n', and sometimes `?'. */
   #extern char *get_history_event (const char *, int *, int);
+
+  # Return an array of tokens, much as the shell might.  The tokens are
+  # parsed out of STRING.
   #
-  #/* Return an array of tokens, much as the shell might.  The tokens are
-  #   parsed out of STRING. */
   #extern char **history_tokenize (const char *);
-  #
-  #/* Exported history variables. */
+
+  # Exported history variables.
   #extern int history_base;
   #extern int history_length;
   #extern int history_max_entries;
@@ -313,16 +365,20 @@ class ReadLine {
   #extern char *history_no_expand_chars;
   #extern char *history_search_delimiter_chars;
   #extern int history_quotes_inhibit_expansion;
-  #
+
   #extern int history_write_timestamps;
+
+  # Backwards compatibility 
   #
-  #/* Backwards compatibility */
   #extern int max_input_history;
+
+  # If set, this function is called to decide whether or not a particular
+  # history expansion should be treated as a special case for the calling
+  # application and not expanded.
   #
-  #/* If set, this function is called to decide whether or not a particular
-  #   history expansion should be treated as a special case for the calling
-  #   application and not expanded. */
   #extern rl_linebuf_func_t *history_inhibit_expansion_function;
+
+  #############################################################################
   #
   # keymaps.h -- Manipulation of readline keymaps.
   #
@@ -331,11 +387,13 @@ class ReadLine {
   # FUNCTION is the address of a function to run, or the
   # address of a keymap to indirect through.
   # TYPE says which kind of thing FUNCTION is.
+  #
+  class rl_command_func_t is repr('CPointer') { } #typedef int rl_command_func_t (int, int);
 
-  # typedef struct _keymap_entry { ... } KEYMAP_ENTRY;
+  class _keymap_entry is repr('CPointer') { } # is KEYMAP_ENTRY
   class KEYMAP_ENTRY is repr('CStruct') {
-    has byte    $.type;     # char type;
-    has Pointer $.function; # rl_command_func_t *function
+    has byte              $.type;     # char type;
+    has rl_command_func_t $.function; # rl_command_func_t *function
   }
 
   # This must be large enough to hold bindings for all of the characters
@@ -346,7 +404,7 @@ class ReadLine {
   constant ANYOTHERKEY = KEYMAP_SIZE - 1;
 
   #typedef KEYMAP_ENTRY KEYMAP_ENTRY_ARRAY[KEYMAP_SIZE];
-  #typedef KEYMAP_ENTRY *Keymap;
+  class Keymap is repr('CPointer') { } #typedef KEYMAP_ENTRY *Keymap;
   #
   # The values that TYPE can have in a keymap entry.
   #
@@ -354,51 +412,100 @@ class ReadLine {
   constant ISKMAP = 1;
   constant ISMACR = 2;
 
-  #extern KEYMAP_ENTRY_ARRAY emacs_standard_keymap, emacs_meta_keymap, emacs_ctlx_keymap;
+  #extern KEYMAP_ENTRY_ARRAY emacs_standard_keymap, emacs_meta_keymap;
+  #extern KEYMAP_ENTRY emacs_ctlx_keymap;
   #extern KEYMAP_ENTRY_ARRAY vi_insertion_keymap, vi_movement_keymap;
+
+  # Return a new, empty keymap.
+  # Free it with free() when you are done.
   #
-  #/* Return a new, empty keymap.
-  #   Free it with free() when you are done. */
-  #extern Keymap rl_make_bare_keymap (void);
+  sub rl_make_bare_keymap( ) returns Keymap
+    is native( LIB ) { * }
+  method rl-make-bare-keymap( ) returns Keymap {
+    rl_make_bare_keymap( ) }
+
+  # Return a new keymap which is a copy of MAP.
   #
-  #/* Return a new keymap which is a copy of MAP. */
-  #extern Keymap rl_copy_keymap (Keymap);
+  sub rl_copy_keymap( Keymap ) returns Keymap
+    is native( LIB ) { * }
+  method rl-copy-keymap( Keymap $k ) returns Keymap {
+    rl_copy_keymap( $k ) }
+
+  # Return a new keymap with the printing characters bound to rl_insert,
+  # the lowercase Meta characters bound to run their equivalents, and
+  # the Meta digits bound to produce numeric arguments.
   #
-  #/* Return a new keymap with the printing characters bound to rl_insert,
-  #   the lowercase Meta characters bound to run their equivalents, and
-  #   the Meta digits bound to produce numeric arguments. */
-  #extern Keymap rl_make_keymap (void);
+  sub rl_make_keymap( ) returns Keymap
+    is native( LIB ) { * }
+  method rl-make-keymap( ) returns Keymap {
+    rl_make_keymap( ) }
+
+  # Free the storage associated with a keymap.
   #
-  #/* Free the storage associated with a keymap. */
-  #extern void rl_discard_keymap (Keymap);
+  sub rl_discard_keymap( Keymap )
+    is native( LIB ) { * }
+  method rl-discard-keymap( Keymap $k ) {
+    rl_discard_keymap( $k ) }
+
+  sub rl_free_keymap( Keymap )
+    is native( LIB ) { * }
+  method rl-free-keymap( Keymap $k ) {
+    rl_free_keymap( $k ) }
+
+  # These functions actually appear in bind.c
   #
-  #/* These functions actually appear in bind.c */
+  # Return the keymap corresponding to a given name.  Names look like
+  # `emacs' or `emacs-meta' or `vi-insert'.
   #
-  #/* Return the keymap corresponding to a given name.  Names look like
-  #   `emacs' or `emacs-meta' or `vi-insert'.  */
-  #extern Keymap rl_get_keymap_by_name (const char *);
+  sub rl_get_keymap_by_name( Str ) returns Keymap
+    is native( LIB ) { * }
+  method rl-get-keymap-by-name( Str $name ) returns Keymap {
+    rl_get_keymap_by_name( $name ) }
+
+  # Return the current keymap.
   #
-  #/* Return the current keymap. */
-  #extern Keymap rl_get_keymap (void);
+  sub rl_get_keymap( ) returns Keymap
+    is native( LIB ) { * }
+  method rl-get-keymap( ) returns Keymap {
+    rl_get_keymap( ) }
+
+  # Get the name of an existing keymap
   #
-  #/* Set the current keymap to MAP. */
-  #extern void rl_set_keymap (Keymap);
+  sub rl_get_keymap_name( Keymap ) returns Str
+    is native( LIB ) { * }
+  method rl-get-keymap-name( Keymap $k ) returns Str {
+    rl_get_keymap_name( $k ) }
+
+  # Set the current keymap to MAP.
   #
-  #/* Readline.h -- the names of functions callable from within readline. */
+  sub rl_set_keymap( Keymap )
+    is native( LIB ) { * }
+  method rl-set-keymap( Keymap $k ) {
+    rl_set_keymap( $k ) }
+
+  #############################################################################
   #
-  #/* Readline data structures. */
+  # Readline.h -- the names of functions callable from within readline.
   #
-  #/* Maintaining the state of undo.  We remember individual deletes and inserts
-  #   on a chain of things to do. */
+  # Readline data structures.
   #
-  #/* The actions that undo knows how to undo.  Notice that UNDO_DELETE means
-  #   to insert some text, and UNDO_INSERT means to delete some text.   I.e.,
-  #   the code tells undo what to undo, not how to undo it. */
+  # Maintaining the state of undo.  We remember individual deletes and inserts
+  # on a chain of things to do.
+  #
+  # The actions that undo knows how to undo.  Notice that UNDO_DELETE means
+  # to insert some text, and UNDO_INSERT means to delete some text.   I.e.,
+  # the code tells undo what to undo, not how to undo it.
+  #
   #enum undo_code { UNDO_DELETE, UNDO_INSERT, UNDO_BEGIN, UNDO_END };
-  #
+
+  constant UNDO_DELETE = 0;
+  constant UNDO_INSERT = 1;
+  constant UNDO_BEGIN  = 2;
+  constant UNDO_END    = 3;
+
   # What an element of THE_UNDO_LIST looks like.
   #
-  # typedef undo_list { ... } UNDO_LIST;
+  class undo_list is repr('CPointer') { } # is a UNDO_LIST
   class UNDO_LIST is repr('CStruct') {
     has Pointer $.next; # struct undo_list *next;
     has int $.start;    # int start; # Where the change took place.
@@ -407,237 +514,272 @@ class ReadLine {
     has byte $.what;    # enum undo_code what; # Delete, Insert, Begin, End.
   }
 
-  #/* The current undo list for RL_LINE_BUFFER. */
+  # The current undo list for RL_LINE_BUFFER.
+  #
   #extern UNDO_LIST *rl_undo_list;
 
   # The data structure for mapping textual names to code addresses.
   #
-  # typedef struct _funmap { ... } FUNMAP;
+  class _funmap is repr('CPointer') { } # is a FUNMAP
   class FUNMAP is repr('CStruct') {
-    has Str $.name;         # const char *name;
+    has Str     $.name;     # const char *name;
     has Pointer $.function; # rl_command_func_t *function;
   }
 
   #extern FUNMAP **funmap;
-  #
+
   # Bindable commands for numeric arguments.
   #
-  #extern int rl_digit_argument (int, int);
-  #extern int rl_universal_argument (int, int);
+  # These should only be passed as callbacks, I believe.
   #
+  sub rl_digit_argument( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_universal_argument( Int, Int ) returns Int is native( LIB ) { * }
+
   # Bindable commands for moving the cursor.
   #
-  #extern int rl_forward_byte (int, int);
-  #extern int rl_forward_char (int, int);
-  #extern int rl_forward (int, int);
-  #extern int rl_backward_byte (int, int);
-  #extern int rl_backward_char (int, int);
-  #extern int rl_backward (int, int);
-  #extern int rl_beg_of_line (int, int);
-  #extern int rl_end_of_line (int, int);
-  #extern int rl_forward_word (int, int);
-  #extern int rl_backward_word (int, int);
-  #extern int rl_refresh_line (int, int);
-  #extern int rl_clear_screen (int, int);
-  #extern int rl_skip_csi_sequence (int, int);
-  #extern int rl_arrow_keys (int, int);
-  #
+  sub rl_forward_byte( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_forward_char( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_forward( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_backward_byte( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_backward_char( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_backward( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_beg_of_line( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_end_of_line( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_forward_word( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_backward_word( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_refresh_line( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_clear_screen( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_skip_csi_sequence( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_arrow_keys( Int, Int ) returns Int is native( LIB ) { * }
+
   # Bindable commands for inserting and deleting text.
   #
-  #extern int rl_insert (int, int);
-  #extern int rl_quoted_insert (int, int);
-  #extern int rl_tab_insert (int, int);
-  #extern int rl_newline (int, int);
-  #extern int rl_do_lowercase_version (int, int);
-  #extern int rl_rubout (int, int);
-  #extern int rl_delete (int, int);
-  #extern int rl_rubout_or_delete (int, int);
-  #extern int rl_delete_horizontal_space (int, int);
-  #extern int rl_delete_or_show_completions (int, int);
-  #extern int rl_insert_comment (int, int);
-  #
+  sub rl_insert( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_quoted_insert( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_tab_insert( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_newline( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_do_lowercase_version( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_rubout( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_delete( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_rubout_or_delete( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_delete_horizontal_space( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_delete_or_show_completions( Int, Int ) returns Int
+    is native( LIB ) { * }
+  sub rl_insert_comment( Int, Int ) returns Int is native( LIB ) { * }
+
   # Bindable commands for changing case.
   #
-  #extern int rl_upcase_word (int, int);
-  #extern int rl_downcase_word (int, int);
-  #extern int rl_capitalize_word (int, int);
-  #
+  sub rl_upcase_word( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_downcase_word( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_capitalize_word( Int, Int ) returns Int is native( LIB ) { * }
+
   # Bindable commands for transposing characters and words.
   #
-  #extern int rl_transpose_words (int, int);
-  #extern int rl_transpose_chars (int, int);
-  #
+  sub rl_transpose_words( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_transpose_chars( Int, Int ) returns Int is native( LIB ) { * }
+
   # Bindable commands for searching within a line.
   #
-  #extern int rl_char_search (int, int);
-  #extern int rl_backward_char_search (int, int);
+  sub rl_char_search( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_backward_char_search( Int, Int ) returns Int is native( LIB ) { * }
+
+  # Bindable commands for readline's interface to the command history.
   #
-  #/* Bindable commands for readline's interface to the command history. */
-  #extern int rl_beginning_of_history (int, int);
-  #extern int rl_end_of_history (int, int);
-  #extern int rl_get_next_history (int, int);
-  #extern int rl_get_previous_history (int, int);
-  #
+  sub rl_beginning_of_history ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_end_of_history ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_get_next_history ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_get_previous_history ( Int, Int ) returns Int is native( LIB ) { * }
+
   # Bindable commands for managing the mark and region.
   #
-  #extern int rl_set_mark (int, int);
-  #extern int rl_exchange_point_and_mark (int, int);
-  #
+  sub rl_set_mark ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_exchange_point_and_mark ( Int, Int ) returns Int is native( LIB ) { * }
+
   # Bindable commands to set the editing mode (emacs or vi).
   #
-  #extern int rl_vi_editing_mode (int, int);
-  #extern int rl_emacs_editing_mode (int, int);
+  sub rl_vi_editing_mode ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_emacs_editing_mode ( Int, Int ) returns Int is native( LIB ) { * }
+
+  # Bindable commands to change the insert mode (insert or overwrite)
   #
-  #/* Bindable commands to change the insert mode (insert or overwrite) */
-  #extern int rl_overwrite_mode (int, int);
+  sub rl_overwrite_mode ( Int, Int ) returns Int is native( LIB ) { * }
+
+  # Bindable commands for managing key bindings.
   #
-  #/* Bindable commands for managing key bindings. */
-  #extern int rl_re_read_init_file (int, int);
-  #extern int rl_dump_functions (int, int);
-  #extern int rl_dump_macros (int, int);
-  #extern int rl_dump_variables (int, int);
-  #
+  sub rl_re_read_init_file ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_dump_functions ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_dump_macros ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_dump_variables ( Int, Int ) returns Int is native( LIB ) { * }
+
   # Bindable commands for word completion.
   #
-  #extern int rl_complete (int, int);
-  #extern int rl_possible_completions (int, int);
-  #extern int rl_insert_completions (int, int);
-  #extern int rl_old_menu_complete (int, int);
-  #extern int rl_menu_complete (int, int);
-  #extern int rl_backward_menu_complete (int, int);
-  #
+  sub rl_complete ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_possible_completions ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_insert_completions ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_old_menu_complete ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_menu_complete ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_backward_menu_complete ( Int, Int ) returns Int is native( LIB ) { * }
+
   # Bindable commands for killing and yanking text, and managing the kill ring.
   #
-  #extern int rl_kill_word (int, int);
-  #extern int rl_backward_kill_word (int, int);
-  #extern int rl_kill_line (int, int);
-  #extern int rl_backward_kill_line (int, int);
-  #extern int rl_kill_full_line (int, int);
-  #extern int rl_unix_word_rubout (int, int);
-  #extern int rl_unix_filename_rubout (int, int);
-  #extern int rl_unix_line_discard (int, int);
-  #extern int rl_copy_region_to_kill (int, int);
-  #extern int rl_kill_region (int, int);
-  #extern int rl_copy_forward_word (int, int);
-  #extern int rl_copy_backward_word (int, int);
-  #extern int rl_yank (int, int);
-  #extern int rl_yank_pop (int, int);
-  #extern int rl_yank_nth_arg (int, int);
-  #extern int rl_yank_last_arg (int, int);
-  #extern int rl_paste_from_clipboard (int, int);
-  #
+  sub rl_kill_word ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_backward_kill_word ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_kill_line ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_backward_kill_line ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_kill_full_line ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_unix_word_rubout ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_unix_filename_rubout ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_unix_line_discard ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_copy_region_to_kill ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_kill_region ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_copy_forward_word ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_copy_backward_word ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_yank ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_yank_pop ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_yank_nth_arg ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_yank_last_arg ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_paste_from_clipboard ( Int, Int ) returns Int is native( LIB ) { * }
+
   # Bindable commands for incremental searching.
   #
-  #extern int rl_reverse_search_history (int, int);
-  #extern int rl_forward_search_history (int, int);
-  #
+  sub rl_reverse_search_history ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_forward_search_history ( Int, Int ) returns Int is native( LIB ) { * }
+
   # Bindable keyboard macro commands.
   #
-  #extern int rl_start_kbd_macro (int, int);
-  #extern int rl_end_kbd_macro (int, int);
-  #extern int rl_call_last_kbd_macro (int, int);
-  #extern int rl_print_last_kbd_macro (int, int);
+  sub rl_start_kbd_macro ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_end_kbd_macro ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_call_last_kbd_macro ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_print_last_kbd_macro ( Int, Int ) returns Int is native( LIB ) { * }
   #
   # Bindable undo commands.
   #
-  #extern int rl_revert_line (int, int);
-  #extern int rl_undo_command (int, int);
-  #
+  sub rl_revert_line ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_undo_command ( Int, Int ) returns Int is native( LIB ) { * }
+
   # Bindable tilde expansion commands.
   #
-  #extern int rl_tilde_expand (int, int);
-  #
+  sub rl_tilde_expand ( Int, Int ) returns Int is native( LIB ) { * }
+
   # Bindable terminal control commands.
   #
-  #extern int rl_restart_output (int, int);
-  #extern int rl_stop_output (int, int);
-  #
+  sub rl_restart_output ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_stop_output ( Int, Int ) returns Int is native( LIB ) { * }
+
   # Miscellaneous bindable commands.
   #
-  #extern int rl_abort (int, int);
-  #extern int rl_tty_status (int, int);
-  #
+  sub rl_abort ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_tty_status ( Int, Int ) returns Int is native( LIB ) { * }
+
   # Bindable commands for incremental and non-incremental history searching.
   #
-  #extern int rl_history_search_forward (int, int);
-  #extern int rl_history_search_backward (int, int);
-  #extern int rl_history_substr_search_forward (int, int);
-  #extern int rl_history_substr_search_backward (int, int);
-  #extern int rl_noninc_forward_search (int, int);
-  #extern int rl_noninc_reverse_search (int, int);
-  #extern int rl_noninc_forward_search_again (int, int);
-  #extern int rl_noninc_reverse_search_again (int, int);
-  #
+  sub rl_history_search_forward ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_history_search_backward ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_history_substr_search_forward ( Int, Int ) returns Int
+    is native( LIB ) { * }
+  sub rl_history_substr_search_backward ( Int, Int ) returns Int
+    is native( LIB ) { * }
+  sub rl_noninc_forward_search ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_noninc_reverse_search ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_noninc_forward_search_again ( Int, Int ) returns Int
+    is native( LIB ) { * }
+  sub rl_noninc_reverse_search_again ( Int, Int ) returns Int
+    is native( LIB ) { * }
+
   # Bindable command used when inserting a matching close character.
   #
-  #extern int rl_insert_close (int, int);
-  #
+  sub rl_insert_close ( Int, Int ) returns Int is native( LIB ) { * }
+
   # Not available unless READLINE_CALLBACKS is defined.
   #
-  #extern void rl_callback_handler_install (const char *, rl_vcpfunc_t *);
-  #extern void rl_callback_read_char (void);
-  #extern void rl_callback_handler_remove (void);
-  #
+  class rl_vcpfunc_t is repr('CPointer') { } #typedef void rl_vcpfunc_t (char *);
+
+  sub rl_callback_handler_install( Str, rl_vcpfunc_t )
+    is native( LIB ) { * }
+  method rl-callback-handler-install( Str $s, rl_vcpfunc_t $cb ) {
+    rl_callback_handler_install( $s, $cb ) }
+
+  sub rl_callback_read_char( )
+    is native( LIB ) { * }
+  method rl-callback-read-char( ) {
+    rl_callback_read_char( ) }
+ 
+  sub rl_callback_handler_remove( )
+    is native( LIB ) { * }
+  method rl-callback-handler-remove( ) {
+    rl_callback_handler_remove( ) }
+
   # Things for vi mode. Not available unless readline is compiled -DVI_MODE.
   #
   # VI-mode bindable commands.
   #
-  #extern int rl_vi_redo (int, int);
-  #extern int rl_vi_undo (int, int);
-  #extern int rl_vi_yank_arg (int, int);
-  #extern int rl_vi_fetch_history (int, int);
-  #extern int rl_vi_search_again (int, int);
-  #extern int rl_vi_search (int, int);
-  #extern int rl_vi_complete (int, int);
-  #extern int rl_vi_tilde_expand (int, int);
-  #extern int rl_vi_prev_word (int, int);
-  #extern int rl_vi_next_word (int, int);
-  #extern int rl_vi_end_word (int, int);
-  #extern int rl_vi_insert_beg (int, int);
-  #extern int rl_vi_append_mode (int, int);
-  #extern int rl_vi_append_eol (int, int);
-  #extern int rl_vi_eof_maybe (int, int);
-  #extern int rl_vi_insertion_mode (int, int);
-  #extern int rl_vi_insert_mode (int, int);
-  #extern int rl_vi_movement_mode (int, int);
-  #extern int rl_vi_arg_digit (int, int);
-  #extern int rl_vi_change_case (int, int);
-  #extern int rl_vi_put (int, int);
-  #extern int rl_vi_column (int, int);
-  #extern int rl_vi_delete_to (int, int);
-  #extern int rl_vi_change_to (int, int);
-  #extern int rl_vi_yank_to (int, int);
-  #extern int rl_vi_rubout (int, int);
-  #extern int rl_vi_delete (int, int);
-  #extern int rl_vi_back_to_indent (int, int);
-  #extern int rl_vi_first_print (int, int);
-  #extern int rl_vi_char_search (int, int);
-  #extern int rl_vi_match (int, int);
-  #extern int rl_vi_change_char (int, int);
-  #extern int rl_vi_subst (int, int);
-  #extern int rl_vi_overstrike (int, int);
-  #extern int rl_vi_overstrike_delete (int, int);
-  #extern int rl_vi_replace (int, int);
-  #extern int rl_vi_set_mark (int, int);
-  #extern int rl_vi_goto_mark (int, int);
-  #
+  sub rl_vi_redo ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_undo ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_yank_arg ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_fetch_history ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_search_again ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_search ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_complete ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_tilde_expand ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_prev_word ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_next_word ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_end_word ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_insert_beg ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_append_mode ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_append_eol ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_eof_maybe ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_insertion_mode ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_insert_mode ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_movement_mode ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_arg_digit ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_change_case ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_put ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_column ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_delete_to ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_change_to ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_yank_to ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_rubout ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_delete ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_back_to_indent ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_first_print ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_char_search ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_match ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_change_char ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_subst ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_overstrike ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_overstrike_delete ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_replace ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_set_mark ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_goto_mark ( Int, Int ) returns Int is native( LIB ) { * }
+
   # VI-mode utility functions.
   #
-  #extern int rl_vi_check (void);
+  sub rl_vi_check( ) returns Int
+    is native( LIB ) { * }
+  method rl-vi-check( ) returns Int {
+    rl_vi_check() }
+
   #extern int rl_vi_domove (int, int *);
-  #extern int rl_vi_bracktype (int);
-  #
-  #extern void rl_vi_start_inserting (int, int, int);
-  #
+
+  sub rl_vi_bracktype( Int $t ) returns Int
+    is native( LIB ) { * }
+  method rl-vi-bracktype( Int $t ) returns Int {
+    rl_vi_bracktype( $t ) }
+
+  sub rl_vi_start_inserting( Int $t, Int $u, Int $v ) returns Int
+    is native( LIB ) { * }
+  method rl-vi-start-inserting( Int $t, Int $u, Int $v ) returns Int {
+    rl_vi_start_inserting( $t, $u, $v ) }
+
   # VI-mode pseudo-bindable commands, used as utility functions.
   #
-  #extern int rl_vi_fWord (int, int);
-  #extern int rl_vi_bWord (int, int);
-  #extern int rl_vi_eWord (int, int);
-  #extern int rl_vi_fword (int, int);
-  #extern int rl_vi_bword (int, int);
-  #extern int rl_vi_eword (int, int);
-  #
+  sub rl_vi_fWord ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_bWord ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_eWord ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_fword ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_bword ( Int, Int ) returns Int is native( LIB ) { * }
+  sub rl_vi_eword ( Int, Int ) returns Int is native( LIB ) { * }
+
   ###################################################################
   #								    #
   #			Well Published Functions		    #
@@ -645,140 +787,333 @@ class ReadLine {
   ###################################################################
   #
   # Readline functions.
+  #
   # Read a line of input.  Prompt with PROMPT.  A NULL PROMPT means none.
   #
-  #extern char *readline (const char *);
-  #
-  #extern int rl_set_prompt (const char *);
-  #extern int rl_expand_prompt (char *);
-  #
-  #extern int rl_initialize (void);
-  #
+  sub readline( Str $prompt ) returns Str
+    is native( LIB ) { * }
+  method readline( Str $prompt ) returns Str {
+    readline( $prompt ) }
+
+  sub rl_set_prompt( Str $prompt ) returns Int
+    is native( LIB ) { * }
+  method rl-set-prompt( Str $prompt ) returns Int {
+    rl_set_prompt( $prompt ) }
+
+  sub rl_expand_prompt( Str $prompt ) returns Int
+    is native( LIB ) { * }
+  method rl-expand-prompt( Str $prompt ) returns Int {
+    rl_expand_prompt( $prompt ) }
+
+  sub rl_initialize( ) returns Int
+    is native( LIB ) { * }
+  method rl-initialize( ) returns Int {
+    rl_initialize( ) }
+
   # Utility functions to bind keys to readline commands.
   #
-  #extern int rl_add_defun (const char *, rl_command_func_t *, int);
-  #extern int rl_bind_key (int, rl_command_func_t *);
-  #extern int rl_bind_key_in_map (int, rl_command_func_t *, Keymap);
-  #extern int rl_unbind_key (int);
-  #extern int rl_unbind_key_in_map (int, Keymap);
-  #extern int rl_bind_key_if_unbound (int, rl_command_func_t *);
-  #extern int rl_bind_key_if_unbound_in_map (int, rl_command_func_t *, Keymap);
-  #extern int rl_unbind_function_in_map (rl_command_func_t *, Keymap);
-  #extern int rl_unbind_command_in_map (const char *, Keymap);
-  #extern int rl_bind_keyseq (const char *, rl_command_func_t *);
-  #extern int rl_bind_keyseq_in_map (const char *, rl_command_func_t *, Keymap);
-  #extern int rl_bind_keyseq_if_unbound (const char *, rl_command_func_t *);
-  #extern int rl_bind_keyseq_if_unbound_in_map (const char *, rl_command_func_t *, Keymap);
-  #extern int rl_generic_bind (int, const char *, char *, Keymap);
-  #
-  #extern char *rl_variable_value (const char *);
-  #extern int rl_variable_bind (const char *, const char *);
-  #
+  sub rl_bind_key( Int, rl_command_func_t ) returns Int
+    is native( LIB ) { * }
+  method rl-bind-key( Int $i, rl_command_func_t $cb ) returns Int {
+    rl_bind_key( $i, $cb ) }
+
+  sub rl_bind_key_in_map( Int, rl_command_func_t, Keymap ) returns Int
+    is native( LIB ) { * }
+  method rl-bind-key-in-map( Int $i, rl_command_func_t $cb, Keymap $k )
+    returns Int {
+    rl_bind_key_in_map( $i, $cb, $k ) }
+
+  sub rl_unbind_key( Int ) returns Int
+    is native( LIB ) { * }
+  method rl-unbind-key( Int $i ) returns Int {
+    rl_unbind_key( $i ) }
+
+  sub rl_unbind_key_in_map( Int, Keymap ) returns Int
+    is native( LIB ) { * }
+  method rl-unbind-key-in-map( Int $i, Keymap $k ) returns Int {
+    rl_unbind_key_in_map( $i, $k ) }
+
+  sub rl_bind_key_if_unbound( Int, rl_command_func_t ) returns Int
+    is native( LIB ) { * }
+  method rl-bind-key-if-unbound( Int $i, rl_command_func_t $cb ) returns Int {
+    rl_bind_key_if_unbound( $i, $cb ) }
+
+  sub rl_bind_key_if_unbound_in_map( Int, rl_command_func_t, Keymap )
+    returns Int
+    is native( LIB ) { * }
+  method rl-bind-key-if-unbound-in-map
+    ( Int $i, rl_command_func_t $cb, Keymap $k ) returns Int {
+      rl_bind_key_if_unbound_in_map( $i, $cb, $k ) }
+
+  sub rl_unbind_function_in_map( rl_command_func_t, Keymap ) returns Int
+    is native( LIB ) { * }
+  method rl-unbind-function-in-map ( rl_command_func_t $cb, Keymap $k )
+    returns Int {
+      rl_unbind_function_in_map( $cb, $k ) }
+
+  sub rl_bind_keyseq( Str, rl_command_func_t ) returns Int
+    is native( LIB ) { * }
+  method rl-bind-keyseq( Str $str, rl_command_func_t $cb )
+    returns Int {
+      rl_bind_keyseq( $str, $cb ) }
+
+  sub rl_bind_keyseq_in_map( Str, rl_command_func_t, Keymap ) returns Int
+    is native( LIB ) { * }
+  method rl-bind-keyseq-in-map( Str $str, rl_command_func_t $cb, Keymap $k )
+    returns Int {
+      rl_bind_keyseq_in_map( $str, $cb, $k ) }
+
+  sub rl_bind_keyseq_if_unbound( Str, rl_command_func_t ) returns Int
+    is native( LIB ) { * }
+  method rl-bind-keyseq-if-unbound( Str $str, rl_command_func_t $cb )
+   returns Int {
+    rl_bind_keyseq_if_unbound( $str, $cb ) }
+
+  sub rl_bind_keyseq_if_unbound_in_map( Str, rl_command_func_t, Keymap )
+    returns Int
+    is native( LIB ) { * }
+  method rl-bind-keyseq-if-unbound-in-map
+    ( Str $str, rl_command_func_t $cb, Keymap $k ) returns Int {
+      rl_bind_keyseq_if_unbound_in_map( $str, $cb, $k ) }
+
+  sub rl_generic_bind( Int, Str, Str, Keymap ) returns Int
+    is native( LIB ) { * }
+  method rl-generic-bind( Int $i, Str $s, Str $t, Keymap $k ) returns Int {
+    rl_generic_bind( $i, $s, $t, $k ) }
+
+
+  sub rl_add_defun( Str, rl_command_func_t, Int ) returns Int
+    is native( LIB ) { * }
+  method rl-add-defun( Str $str, rl_command_func_t $cb, Int $i ) returns Int {
+    rl_add_defun( $str, $cb, $i ) }
+
+  sub rl_variable_value( Str $s ) returns Str
+    is native( LIB ) { * }
+  method rl-variable-value( Str $s ) returns Str {
+    rl_variable_value( $s ) }
+
+  sub rl_variable_bind( Str $s, Str $t ) returns Int
+    is native( LIB ) { * }
+  method rl-variable-bind( Str $s, Str $t ) returns Int {
+    rl_variable_bind( $s, $t ) }
+
   # Backwards compatibility, use rl_bind_keyseq_in_map instead.
   #
-  #extern int rl_set_key (const char *, rl_command_func_t *, Keymap);
-  #
+  sub rl_set_key( Str, rl_command_func_t, Keymap ) returns Int
+    is native( LIB ) { * }
+  method rl-set-key( Str $str, rl_command_func_t $cb, Keymap $k )
+    returns Int {
+      rl_set_key( $str, $cb, $k ) }
+
   # Backwards compatibility, use rl_generic_bind instead.
   #
-  #extern int rl_macro_bind (const char *, const char *, Keymap);
-  #
+  sub rl_macro_bind( Str, Str, Keymap ) returns Int
+    is native( LIB ) { * }
+  method rl-macro-bind( Str $str, Str $b, Keymap $k ) returns Int {
+    rl_macro_bind( $str, $b, $k ) }
+
   # Undocumented in the texinfo manual; not really useful to programs.
   #
   #extern int rl_translate_keyseq (const char *, char *, int *);
   #extern char *rl_untranslate_keyseq (int);
-  #
+
   #extern rl_command_func_t *rl_named_function (const char *);
   #extern rl_command_func_t *rl_function_of_keyseq (const char *, Keymap, int *);
-  #
+
   #extern void rl_list_funmap_names (void);
   #extern char **rl_invoking_keyseqs_in_map (rl_command_func_t *, Keymap);
   #extern char **rl_invoking_keyseqs (rl_command_func_t *);
-  # 
-  #extern void rl_function_dumper (int);
-  #extern void rl_macro_dumper (int);
-  #extern void rl_variable_dumper (int);
-  #
-  #extern int rl_read_init_file (const char *);
-  #extern int rl_parse_and_bind (char *);
-  #
-  # Functions for manipulating keymaps.
-  #
-  #extern Keymap rl_make_bare_keymap (void);
-  #extern Keymap rl_copy_keymap (Keymap);
-  #extern Keymap rl_make_keymap (void);
-  #extern void rl_discard_keymap (Keymap);
-  #extern void rl_free_keymap (Keymap);
-  #
-  #extern Keymap rl_get_keymap_by_name (const char *);
-  #extern char *rl_get_keymap_name (Keymap);
-  #extern void rl_set_keymap (Keymap);
-  #extern Keymap rl_get_keymap (void);
-  #
+
+  sub rl_function_dumper( Int $i )
+    is native( LIB ) { * }
+  method rl-function-dumper( Int $i ) {
+    rl_function_dumper( $i ) }
+
+  sub rl_macro_dumper( Int $i )
+    is native( LIB ) { * }
+  method rl-macro-dumper( Int $i ) {
+    rl_macro_dumper( $i ) }
+
+  sub rl_variable_dumper( Int $i )
+    is native( LIB ) { * }
+  method rl-variable-dumper( Int $i ) {
+    rl_variable_dumper( $i ) }
+
+  sub rl_read_init_file( Str $name )
+    is native( LIB ) { * }
+  method rl-read-init-file( Str $name ) {
+    rl_read_init_file( $name ) }
+
+  sub rl_parse_and_bind( Str $name ) returns Int
+    is native( LIB ) { * }
+  method rl-parse-and-bind( Str $name ) returns Int {
+    rl_parse_and_bind( $name ) }
+
   # Functions for manipulating the funmap, which maps command names
   # to functions.
   #
   #extern int rl_add_funmap_entry (const char *, rl_command_func_t *);
   #extern const char **rl_funmap_names (void);
-  #
+
   # Utility functions for managing keyboard macros.
   #
-  #extern void rl_push_macro_input (char *);
-  #
+  sub rl_push_macro_input( Str $name )
+    is native( LIB ) { * }
+  method rl-push-macro-input( Str $name ) {
+    rl_push_macro_input( $name ) }
+
   # Functions for undoing, from undo.c
   #
   #extern void rl_add_undo (enum undo_code, int, int, char *);
-  #extern void rl_free_undo_list (void);
-  #extern int rl_do_undo (void);
-  #extern int rl_begin_undo_group (void);
-  #extern int rl_end_undo_group (void);
-  #extern int rl_modifying (int, int);
-  #
+
+  sub rl_free_undo_list( )
+    is native( LIB ) { * }
+  method rl-free-undo-list( ) {
+    rl_free_undo_list( ) }
+
+  sub rl_do_undo( ) returns Int
+    is native( LIB ) { * }
+  method rl-do-undo( ) returns Int {
+    rl_do_undo( ) }
+
+  sub rl_begin_undo_group( ) returns Int
+    is native( LIB ) { * }
+  method rl-begin-undo-group( ) returns Int {
+    rl_begin_undo_group( ) }
+
+  sub rl_end_undo_group( ) returns Int
+    is native( LIB ) { * }
+  method rl-end-undo-group( ) returns Int {
+    rl_end_undo_group( ) }
+
+  sub rl_modifying( Int $i, Int $j ) returns Int
+    is native( LIB ) { * }
+  method rl-modifying( Int $i, Int $j ) returns Int {
+    rl_modifying( $i, $j ) }
+
   # Functions for redisplay.
   #
-  #extern void rl_redisplay (void);
-  #extern int rl_on_new_line (void);
-  #extern int rl_on_new_line_with_prompt (void);
-  #extern int rl_forced_update_display (void);
-  #extern int rl_clear_message (void);
-  #extern int rl_reset_line_state (void);
-  #extern int rl_crlf (void);
-  #
+  sub rl_redisplay( )
+    is native( LIB ) { * }
+  method rl-redisplay( ) {
+    rl_redisplay( ) }
+
+  sub rl_on_new_line( ) returns Int
+    is native( LIB ) { * }
+  method rl-on-new-line( ) returns Int {
+    rl_on_new_line( ) }
+
+  sub rl_on_new_line_with_prompt( ) returns Int
+    is native( LIB ) { * }
+  method rl-on-new-line-with-prompt( ) returns Int {
+    rl_on_new_line_with_prompt( ) }
+
+  sub rl_forced_update_display( ) returns Int
+    is native( LIB ) { * }
+  method rl-forced-update-display( ) returns Int {
+    rl_forced_update_display( ) }
+
+  sub rl_clear_message( ) returns Int
+    is native( LIB ) { * }
+  method rl-clear-message( ) returns Int {
+    rl_clear_message( ) }
+
+  sub rl_reset_line_state( ) returns Int
+    is native( LIB ) { * }
+  method reset_line_state( ) returns Int {
+    rl_reset_line_state( ) }
+
+  sub rl_crlf( ) returns Int
+    is native( LIB ) { * }
+  method rl-crlf( ) returns Int {
+    rl_crlf( ) }
+
   #extern int rl_message (const char *, ...)  __rl_attribute__((__format__ (printf, 1, 2));
-  #
-  #extern int rl_show_char (int);
-  #
+
+  sub rl_show_char( Int $c ) returns Int
+    is native( LIB ) { * }
+  method rl-show-char( Int $c ) returns Int {
+    rl_show_char( $c ) }
+
   # Undocumented in texinfo manual.
   #
-  #extern int rl_character_len (int, int);
-  #
+  sub rl_character_len( Int $c, Int $d ) returns Int
+    is native( LIB ) { * }
+  method rl-character-len( Int $c, Int $d ) returns Int {
+    rl_character_len( $c, $d ) }
+
   # Save and restore internal prompt redisplay information.
   #
-  #extern void rl_save_prompt (void);
-  #extern void rl_restore_prompt (void);
-  #
+  sub rl_save_prompt( )
+    is native( LIB ) { * }
+  method rl-save-prompt( ) {
+    rl_save_prompt( ) }
+
+  sub rl_restore_prompt( )
+    is native( LIB ) { * }
+  method rl-restore-prompt( ) {
+    rl_restore_prompt( ) }
+
   # Modifying text.
   #
-  #extern void rl_replace_line (const char *, int);
-  #extern int rl_insert_text (const char *);
-  #extern int rl_delete_text (int, int);
-  #extern int rl_kill_text (int, int);
-  #extern char *rl_copy_text (int, int);
-  #
+  sub rl_replace_line( Str $text, Int $i )
+    is native( LIB ) { * }
+  method rl-replace-line( Str $text, Int $i ) {
+    rl_replace_line( $text, $i ) }
+
+  sub rl_insert_text( Str $text ) returns Int
+    is native( LIB ) { * }
+  method rl-insert-text( Str $text ) returns Int {
+    rl_insert_text( $text ) }
+
+  sub rl_delete_text( Int $a, Int $b ) returns Int
+    is native( LIB ) { * }
+  method rl-delete-text( Int $a, Int $b ) returns Int {
+    rl_delete_text( $a, $b ) }
+
+  sub rl_kill_text( Int $a, Int $b ) returns Int
+    is native( LIB ) { * }
+  method rl-kill-text( Int $a, Int $b ) returns Int {
+    rl_kill_text( $a, $b ) }
+
+  sub rl_copy_text( Int $a, Int $b ) returns Str
+    is native( LIB ) { * }
+  method rl-copy-text( Int $a, Int $b ) returns Str {
+    rl_copy_text( $a, $b ) }
+
   # Terminal and tty mode management.
   #
-  #extern void rl_prep_terminal (int);
-  #extern void rl_deprep_terminal (void);
-  #extern void rl_tty_set_default_bindings (Keymap);
-  #extern void rl_tty_unset_default_bindings (Keymap);
-  #
+  sub rl_prep_terminal( Int )
+    is native( LIB ) { * }
+  method rl-prep-terminal( Int $i ) {
+    rl_prep_terminal( $i ) }
+
+  sub rl_deprep_terminal( )
+    is native( LIB ) { * }
+  method rl-deprep-terminal( ) {
+    rl_deprep_terminal( ) }
+
+  sub rl_tty_set_default_bindings( Keymap )
+    is native( LIB ) { * }
+  method rl-tty-set-default-bindings( Keymap $k ) {
+    rl_tty_set_default_bindings ( $k ) }
+
+  sub rl_tty_unset_default_bindings ( Keymap )
+    is native( LIB ) { * }
+  method rl-tty-unset-default-bindings( Keymap $k ) {
+    rl_tty_unset_default_bindings ( $k ) }
+
   #extern int rl_reset_terminal (const char *);
   #extern void rl_resize_terminal (void);
   #extern void rl_set_screen_size (int, int);
   #extern void rl_get_screen_size (int *, int *);
   #extern void rl_reset_screen_size (void);
-  #
-  #extern char *rl_get_termcap (const char *);
-  #
+
+  sub rl_get_termcap( Str $c ) returns Str
+    is native( LIB ) { * }
+  method rl-get-termcap( Str $c ) returns Str {
+    rl_get_termcap( $c ) }
+
   # Functions for character input.
   #
   #extern int rl_stuff_char (int);
@@ -787,41 +1122,77 @@ class ReadLine {
   #extern int rl_read_key (void);
   #extern int rl_getc (FILE *);
   #extern int rl_set_keyboard_input_timeout (int);
-  #
+
   # `Public' utility functions.
   #
-  #extern void rl_extend_line_buffer (int);
-  #extern int rl_ding (void);
-  #extern int rl_alphabetic (int);
-  #extern void rl_free (void *);
-  #
+  sub rl_extend_line_buffer( Int $c )
+    is native( LIB ) { * }
+  method rl-extend-line-buffer( Int $c ) {
+    rl_extend_line_buffer( $c ) }
+
+  sub rl_ding( ) returns Int
+    is native( LIB ) { * }
+  method rl-ding( ) returns Int {
+    rl_ding( ) }
+
+  sub rl_alphabetic( Int $c ) returns Int
+    is native( LIB ) { * }
+  method rl-alphabetic( Int $c ) returns Int {
+    rl_alphabetic( $c ) }
+
+  sub rl_free( Pointer $p )
+    is native( LIB ) { * }
+  method rl-free( Pointer $p ) {
+    rl_free( $p ) }
+
   # Readline signal handling, from signals.c
   #
-  #extern int rl_set_signals (void);
-  #extern int rl_clear_signals (void);
-  #extern void rl_cleanup_after_signal (void);
-  #extern void rl_reset_after_signal (void);
-  #extern void rl_free_line_state (void);
-  #
-  #extern void rl_echo_signal_char (int)); 
-  #
-  #extern int rl_set_paren_blink_timeout (int);
-  #
-  #/* History management functions. */
-  #
-  #extern void rl_clear_history (void);
-  #
+  sub rl_set_signals( ) returns Int
+    is native( LIB ) { * }
+  method rl-set-signals( ) returns Int {
+    rl_set_signals( ) }
+
+  sub rl_clear_signals( ) returns Int
+    is native( LIB ) { * }
+  method rl-clear-signals( ) returns Int {
+    rl_clear_signals( ) }
+
+  sub rl_cleanup_after_signal( )
+    is native( LIB ) { * }
+  method rl-cleanup-after-signal( ) {
+    rl_cleanup_after_signal( ) }
+
+  sub rl_reset_after_signal( )
+    is native( LIB ) { * }
+  method rl-reset-after-signal( ) {
+    rl_reset_after_signal( ) }
+
+  sub rl_free_line_state( )
+    is native( LIB ) { * }
+  method rl-free-line-state( ) {
+    rl_free_line_state( ) }
+
+  sub rl_echo_signal( Int $c )
+    is native( LIB ) { * }
+  method rl-echo-signal( Int $c ) {
+    rl_echo_signal( $c ) }
+
+  sub rl_set_paren_blink_timeout( Int $c ) returns Int
+    is native( LIB ) { * }
+  method rl-set-paren-blink-timeout( Int $c ) returns Int {
+    rl_set_paren_blink_timeout( $c ) }
+
   # Completion functions.
   #
   #extern int rl_complete_internal (int);
   #extern void rl_display_match_list (char **, int, int);
-  #
+
   #extern char **rl_completion_matches (const char *, rl_compentry_func_t *);
   #extern char *rl_username_completion_function (const char *, int);
   #extern char *rl_filename_completion_function (const char *, int);
-  #
+
   #extern int rl_completion_mode (rl_command_func_t *);
-  #
+
   ############################################################
   #  							     #
   #  		Well Published Variables		     #
@@ -830,358 +1201,417 @@ class ReadLine {
   #
   # The version of this incarnation of the readline library.
   #
-  #extern const char *rl_library_version;		/* e.g., "4.2" */
-  #extern int rl_readline_version;			/* e.g., 0x0402 */
-  #
+  #extern const char *rl_library_version;	/* e.g., "4.2" */
+  #extern int rl_readline_version;		/* e.g., 0x0402 */
+
   # True if this is real GNU readline.
   #
   #extern int rl_gnu_readline_p;
-  #
+
   # Flags word encapsulating the current readline state.
   #
   #extern int rl_readline_state;
-  #
+
   # Says which editing mode readline is currently using.  1 means emacs mode;
   # 0 means vi mode.
   #
   #extern int rl_editing_mode;
-  #
+
   # Insert or overwrite mode for emacs mode.  1 means insert mode; 0 means
   # overwrite mode.  Reset to insert mode on each input line.
   #
   #extern int rl_insert_mode;
-  #
+
   # The name of the calling program.  You should initialize this to
   # whatever was in argv[0].  It is used when parsing conditionals.
   #
   #extern const char *rl_readline_name;
-  #
+
   # The prompt readline uses.  This is set from the argument to
   # readline (), and should not be assigned to directly.
   #
   #extern char *rl_prompt;
-  #
+
   # The prompt string that is actually displayed by rl_redisplay.  Public so
   # applications can more easily supply their own redisplay functions.
   #
   #extern char *rl_display_prompt;
-  #
+
   # The line buffer that is in use.
   #
   #extern char *rl_line_buffer;
-  #
+
   # The location of point, and end.
   #
   #extern int rl_point;
   #extern int rl_end;
-  #
+
   # The mark, or saved cursor position.
   #
   #extern int rl_mark;
-  #
+
   # Flag to indicate that readline has finished with the current input
   # line and should return it.
   #
   #extern int rl_done;
+
+  # If set to a character value, that will be the next keystroke read.
   #
-  #/* If set to a character value, that will be the next keystroke read. */
   #extern int rl_pending_input;
+
+  # Non-zero if we called this function from _rl_dispatch().  It's present
+  # so functions can find out whether they were called from a key binding
+  # or directly from an application.
   #
-  #/* Non-zero if we called this function from _rl_dispatch().  It's present
-  #   so functions can find out whether they were called from a key binding
-  #   or directly from an application. */
   #extern int rl_dispatching;
+
+  # Non-zero if the user typed a numeric argument before executing the
+  # current function.
   #
-  #/* Non-zero if the user typed a numeric argument before executing the
-  #   current function. */
   #extern int rl_explicit_arg;
+
+  # The current value of the numeric argument specified by the user.
   #
-  #/* The current value of the numeric argument specified by the user. */
   #extern int rl_numeric_arg;
+
+  # The address of the last command function Readline executed.
   #
-  #/* The address of the last command function Readline executed. */
   #extern rl_command_func_t *rl_last_func;
+
+  # The name of the terminal to use.
   #
-  #/* The name of the terminal to use. */
   #extern const char *rl_terminal_name;
+
+  # The input and output streams.
   #
-  #/* The input and output streams. */
   #extern FILE *rl_instream;
   #extern FILE *rl_outstream;
-  #
+
   # If non-zero, Readline gives values of LINES and COLUMNS from the environment
   # greater precedence than values fetched from the kernel when computing the
   # screen dimensions.
+  #
   #extern int rl_prefer_env_winsize;
+
+  # If non-zero, then this is the address of a function to call just
+  # before readline_internal () prints the first prompt.
   #
-  #/* If non-zero, then this is the address of a function to call just
-  #   before readline_internal () prints the first prompt. */
   #extern rl_hook_func_t *rl_startup_hook;
+
+  # If non-zero, this is the address of a function to call just before
+  # readline_internal_setup () returns and readline_internal starts
+  # reading input characters.
   #
-  #/* If non-zero, this is the address of a function to call just before
-  #   readline_internal_setup () returns and readline_internal starts
-  #   reading input characters. */
   #extern rl_hook_func_t *rl_pre_input_hook;
-  #      
-  #/* The address of a function to call periodically while Readline is
-  #   awaiting character input, or NULL, for no event handling. */
+
+  # The address of a function to call periodically while Readline is
+  # awaiting character input, or NULL, for no event handling.
+  #
   #extern rl_hook_func_t *rl_event_hook;
+
+  # The address of a function to call if a read is interrupted by a signal.
   #
-  #/* The address of a function to call if a read is interrupted by a signal. */
   #extern rl_hook_func_t *rl_signal_event_hook;
+
+  # The address of a function to call if Readline needs to know whether or not
+  # there is data available from the current input source.
   #
-  #/* The address of a function to call if Readline needs to know whether or not
-  #   there is data available from the current input source. */
   #extern rl_hook_func_t *rl_input_available_hook;
+
+  # The address of the function to call to fetch a character from the current
+  # Readline input stream.
   #
-  #/* The address of the function to call to fetch a character from the current
-  #   Readline input stream */
   #extern rl_getc_func_t *rl_getc_function;
-  #
+
   #extern rl_voidfunc_t *rl_redisplay_function;
-  #
+
   #extern rl_vintfunc_t *rl_prep_term_function;
   #extern rl_voidfunc_t *rl_deprep_term_function;
+
+  # Dispatch variables.
   #
-  #/* Dispatch variables. */
   #extern Keymap rl_executing_keymap;
   #extern Keymap rl_binding_keymap;
-  #
+
   #extern int rl_executing_key;
   #extern char *rl_executing_keyseq;
   #extern int rl_key_sequence_length;
+
+  # Display variables.
   #
-  #/* Display variables. */
-  #/* If non-zero, readline will erase the entire line, including any prompt,
-  #   if the only thing typed on an otherwise-blank line is something bound to
-  #   rl_newline. */
+  # If non-zero, readline will erase the entire line, including any prompt,
+  # if the only thing typed on an otherwise-blank line is something bound to
+  # rl_newline.
+  #
   #extern int rl_erase_empty_line;
+
+  # If non-zero, the application has already printed the prompt (rl_prompt)
+  # before calling readline, so readline should not output it the first time
+  # redisplay is done.
   #
-  #/* If non-zero, the application has already printed the prompt (rl_prompt)
-  #   before calling readline, so readline should not output it the first time
-  #   redisplay is done. */
   #extern int rl_already_prompted;
+
+  # A non-zero value means to read only this many characters rather than
+  # up to a character bound to accept-line.
   #
-  #/* A non-zero value means to read only this many characters rather than
-  #   up to a character bound to accept-line. */
   #extern int rl_num_chars_to_read;
+
+  # The text of a currently-executing keyboard macro.
   #
-  #/* The text of a currently-executing keyboard macro. */
   #extern char *rl_executing_macro;
+
+  # Variables to control readline signal handling.
   #
-  #/* Variables to control readline signal handling. */
-  #/* If non-zero, readline will install its own signal handlers for
-  #   SIGINT, SIGTERM, SIGQUIT, SIGALRM, SIGTSTP, SIGTTIN, and SIGTTOU. */
+  # If non-zero, readline will install its own signal handlers for
+  # SIGINT, SIGTERM, SIGQUIT, SIGALRM, SIGTSTP, SIGTTIN, and SIGTTOU.
+  #
   #extern int rl_catch_signals;
+
+  # If non-zero, readline will install a signal handler for SIGWINCH
+  # that also attempts to call any calling application's SIGWINCH signal
+  # handler.  Note that the terminal is not cleaned up before the
+  # application's signal handler is called; use rl_cleanup_after_signal()
+  # to do that.
   #
-  #/* If non-zero, readline will install a signal handler for SIGWINCH
-  #   that also attempts to call any calling application's SIGWINCH signal
-  #   handler.  Note that the terminal is not cleaned up before the
-  #   application's signal handler is called; use rl_cleanup_after_signal()
-  #   to do that. */
   #extern int rl_catch_sigwinch;
+
+  # If non-zero, the readline SIGWINCH handler will modify LINES and
+  # COLUMNS in the environment.
   #
-  #/* If non-zero, the readline SIGWINCH handler will modify LINES and
-  #   COLUMNS in the environment. */
   #extern int rl_change_environment;
+
+  # Completion variables.
   #
-  #/* Completion variables. */
-  #/* Pointer to the generator function for completion_matches ().
-  #   NULL means to use rl_filename_completion_function (), the default
-  #   filename completer. */
+  # Pointer to the generator function for completion_matches ().
+  # NULL means to use rl_filename_completion_function (), the default
+  # filename completer.
+  #
   #extern rl_compentry_func_t *rl_completion_entry_function;
+
+  # Optional generator for menu completion.  Default is
+  # rl_completion_entry_function (rl_filename_completion_function).
   #
-  #/* Optional generator for menu completion.  Default is
-  #   rl_completion_entry_function (rl_filename_completion_function). */
   # extern rl_compentry_func_t *rl_menu_completion_entry_function;
+
+  # If rl_ignore_some_completions_function is non-NULL it is the address
+  # of a function to call after all of the possible matches have been
+  # generated, but before the actual completion is done to the input line.
+  # The function is called with one argument; a NULL terminated array
+  # of (char *).  If your function removes any of the elements, they
+  # must be free()'ed.
   #
-  #/* If rl_ignore_some_completions_function is non-NULL it is the address
-  #   of a function to call after all of the possible matches have been
-  #   generated, but before the actual completion is done to the input line.
-  #   The function is called with one argument; a NULL terminated array
-  #   of (char *).  If your function removes any of the elements, they
-  #   must be free()'ed. */
   #extern rl_compignore_func_t *rl_ignore_some_completions_function;
+
+  # Pointer to alternative function to create matches.
+  # Function is called with TEXT, START, and END.
+  # START and END are indices in RL_LINE_BUFFER saying what the boundaries
+  # of TEXT are.
+  # If this function exists and returns NULL then call the value of
+  # rl_completion_entry_function to try to match, otherwise use the
+  # array of strings returned.
   #
-  #/* Pointer to alternative function to create matches.
-  #   Function is called with TEXT, START, and END.
-  #   START and END are indices in RL_LINE_BUFFER saying what the boundaries
-  #   of TEXT are.
-  #   If this function exists and returns NULL then call the value of
-  #   rl_completion_entry_function to try to match, otherwise use the
-  #   array of strings returned. */
   #extern rl_completion_func_t *rl_attempted_completion_function;
+
+  # The basic list of characters that signal a break between words for the
+  # completer routine.  The initial contents of this variable is what
+  # breaks words in the shell, i.e. "n\"\\'`@$>".
   #
-  #/* The basic list of characters that signal a break between words for the
-  #   completer routine.  The initial contents of this variable is what
-  #   breaks words in the shell, i.e. "n\"\\'`@$>". */
   #extern const char *rl_basic_word_break_characters;
+
+  # The list of characters that signal a break between words for
+  # rl_complete_internal.  The default list is the contents of
+  # rl_basic_word_break_characters.
   #
-  #/* The list of characters that signal a break between words for
-  #   rl_complete_internal.  The default list is the contents of
-  #   rl_basic_word_break_characters.  */
-  #extern /*const*/ char *rl_completer_word_break_characters;
+  #extern char *rl_completer_word_break_characters;
+
+  # Hook function to allow an application to set the completion word
+  # break characters before readline breaks up the line.  Allows
+  # position-dependent word break characters.
   #
-  #/* Hook function to allow an application to set the completion word
-  #   break characters before readline breaks up the line.  Allows
-  #   position-dependent word break characters. */
   #extern rl_cpvfunc_t *rl_completion_word_break_hook;
+
+  # List of characters which can be used to quote a substring of the line.
+  # Completion occurs on the entire substring, and within the substring   
+  # rl_completer_word_break_characters are treated as any other character,
+  # unless they also appear within this list.
   #
-  #/* List of characters which can be used to quote a substring of the line.
-  #   Completion occurs on the entire substring, and within the substring   
-  #   rl_completer_word_break_characters are treated as any other character,
-  #   unless they also appear within this list. */
   #extern const char *rl_completer_quote_characters;
+
+  # List of quote characters which cause a word break.
   #
-  #/* List of quote characters which cause a word break. */
   #extern const char *rl_basic_quote_characters;
-  #
+
   # List of characters that need to be quoted in filenames by the completer.
+  #
   #extern const char *rl_filename_quote_characters;
+
+  # List of characters that are word break characters, but should be left
+  # in TEXT when it is passed to the completion function.  The shell uses
+  # this to help determine what kind of completing to do.
   #
-  #/* List of characters that are word break characters, but should be left
-  #   in TEXT when it is passed to the completion function.  The shell uses
-  #   this to help determine what kind of completing to do. */
   #extern const char *rl_special_prefixes;
+
+  # If non-zero, then this is the address of a function to call when
+  # completing on a directory name.  The function is called with
+  # the address of a string (the current directory name) as an arg.  It
+  # changes what is displayed when the possible completions are printed
+  # or inserted.  The directory completion hook should perform
+  # any necessary dequoting.  This function should return 1 if it modifies
+  # the directory name pointer passed as an argument.  If the directory
+  # completion hook returns 0, it should not modify the directory name
+  # pointer passed as an argument.
   #
-  #/* If non-zero, then this is the address of a function to call when
-  #   completing on a directory name.  The function is called with
-  #   the address of a string (the current directory name) as an arg.  It
-  #   changes what is displayed when the possible completions are printed
-  #   or inserted.  The directory completion hook should perform
-  #   any necessary dequoting.  This function should return 1 if it modifies
-  #   the directory name pointer passed as an argument.  If the directory
-  #   completion hook returns 0, it should not modify the directory name
-  #   pointer passed as an argument. */
   #extern rl_icppfunc_t *rl_directory_completion_hook;
+
+  # If non-zero, this is the address of a function to call when completing
+  # a directory name.  This function takes the address of the directory name
+  # to be modified as an argument.  Unlike rl_directory_completion_hook, it
+  # only modifies the directory name used in opendir(2), not what is displayed
+  # when the possible completions are printed or inserted.  If set, it takes
+  # precedence over rl_directory_completion_hook.  The directory rewrite
+  # hook should perform any necessary dequoting.  This function has the same
+  # return value properties as the directory_completion_hook.
   #
-  #/* If non-zero, this is the address of a function to call when completing
-  #   a directory name.  This function takes the address of the directory name
-  #   to be modified as an argument.  Unlike rl_directory_completion_hook, it
-  #   only modifies the directory name used in opendir(2), not what is displayed
-  #   when the possible completions are printed or inserted.  If set, it takes
-  #   precedence over rl_directory_completion_hook.  The directory rewrite
-  #   hook should perform any necessary dequoting.  This function has the same
-  #   return value properties as the directory_completion_hook.
+  # I'm not happy with how this works yet, so it's undocumented.  I'm trying
+  # it in bash to see how well it goes.
   #
-  #   I'm not happy with how this works yet, so it's undocumented.  I'm trying
-  #   it in bash to see how well it goes. */
   #extern rl_icppfunc_t *rl_directory_rewrite_hook;
+
+  # If non-zero, this is the address of a function for the completer to call
+  # before deciding which character to append to a completed name.  It should
+  # modify the directory name passed as an argument if appropriate, and return
+  # non-zero if it modifies the name.  This should not worry about dequoting
+  # the filename; that has already happened by the time it gets here. */
   #
-  #/* If non-zero, this is the address of a function for the completer to call
-  #   before deciding which character to append to a completed name.  It should
-  #   modify the directory name passed as an argument if appropriate, and return
-  #   non-zero if it modifies the name.  This should not worry about dequoting
-  #   the filename; that has already happened by the time it gets here. */
   #extern rl_icppfunc_t *rl_filename_stat_hook;
+
+  # If non-zero, this is the address of a function to call when reading
+  # directory entries from the filesystem for completion and comparing
+  # them to the partial word to be completed.  The function should
+  # either return its first argument (if no conversion takes place) or
+  # newly-allocated memory.  This can, for instance, convert filenames
+  # between character sets for comparison against what's typed at the
+  # keyboard.  The returned value is what is added to the list of
+  # matches.  The second argument is the length of the filename to be
+  # converted.
   #
-  #/* If non-zero, this is the address of a function to call when reading
-  #   directory entries from the filesystem for completion and comparing
-  #   them to the partial word to be completed.  The function should
-  #   either return its first argument (if no conversion takes place) or
-  #   newly-allocated memory.  This can, for instance, convert filenames
-  #   between character sets for comparison against what's typed at the
-  #   keyboard.  The returned value is what is added to the list of
-  #   matches.  The second argument is the length of the filename to be
-  #   converted. */
   #extern rl_dequote_func_t *rl_filename_rewrite_hook;
-  #
+
   # If non-zero, then this is the address of a function to call when
   # completing a word would normally display the list of possible matches.
   # This function is called instead of actually doing the display.
   # It takes three arguments: (char **matches, int num_matches, int max_length)
   # where MATCHES is the array of strings that matched, NUM_MATCHES is the
   # number of strings in that array, and MAX_LENGTH is the length of the
-  # longest string in that array. */
+  # longest string in that array.
+  #
   #extern rl_compdisp_func_t *rl_completion_display_matches_hook;
+
+  # Non-zero means that the results of the matches are to be treated
+  # as filenames.  This is ALWAYS zero on entry, and can only be changed
+  # within a completion entry finder function.
   #
-  #/* Non-zero means that the results of the matches are to be treated
-  #   as filenames.  This is ALWAYS zero on entry, and can only be changed
-  #   within a completion entry finder function. */
   #extern int rl_filename_completion_desired;
+
+  # Non-zero means that the results of the matches are to be quoted using
+  # double quotes (or an application-specific quoting mechanism) if the
+  # filename contains any characters in rl_word_break_chars.  This is
+  # ALWAYS non-zero on entry, and can only be changed within a completion
+  # entry finder function.
   #
-  #/* Non-zero means that the results of the matches are to be quoted using
-  #   double quotes (or an application-specific quoting mechanism) if the
-  #   filename contains any characters in rl_word_break_chars.  This is
-  #   ALWAYS non-zero on entry, and can only be changed within a completion
-  #   entry finder function. */
   #extern int rl_filename_quoting_desired;
-  #
+
   # Set to a function to quote a filename in an application-specific fashion.
   # Called with the text to quote, the type of match found (single or multiple)
   # and a pointer to the quoting character to be used, which the function can
-  # reset if desired. */
+  # reset if desired.
+  #
   #extern rl_quote_func_t *rl_filename_quoting_function;
+
+  # Function to call to remove quoting characters from a filename.  Called
+  # before completion is attempted, so the embedded quotes do not interfere
+  # with matching names in the file system.
   #
-  #/* Function to call to remove quoting characters from a filename.  Called
-  #   before completion is attempted, so the embedded quotes do not interfere
-  #   with matching names in the file system. */
   #extern rl_dequote_func_t *rl_filename_dequoting_function;
+
+  # Function to call to decide whether or not a word break character is
+  # quoted.  If a character is quoted, it does not break words for the
+  # completer.
   #
-  #/* Function to call to decide whether or not a word break character is
-  #   quoted.  If a character is quoted, it does not break words for the
-  #   completer. */
   #extern rl_linebuf_func_t *rl_char_is_quoted_p;
+
+  # Non-zero means to suppress normal filename completion after the
+  # user-specified completion function has been called.
   #
-  #/* Non-zero means to suppress normal filename completion after the
-  #   user-specified completion function has been called. */
   #extern int rl_attempted_completion_over;
+
+  # Set to a character describing the type of completion being attempted by
+  # rl_complete_internal; available for use by application completion
+  # functions.
   #
-  #/* Set to a character describing the type of completion being attempted by
-  #   rl_complete_internal; available for use by application completion
-  #   functions. */
   #extern int rl_completion_type;
+
+  # Set to the last key used to invoke one of the completion functions.
   #
-  #/* Set to the last key used to invoke one of the completion functions */
   #extern int rl_completion_invoking_key;
+
+  # Up to this many items will be displayed in response to a
+  # possible-completions call.  After that, we ask the user if she
+  # is sure she wants to see them all.  The default value is 100.
   #
-  #/* Up to this many items will be displayed in response to a
-  #   possible-completions call.  After that, we ask the user if she
-  #   is sure she wants to see them all.  The default value is 100. */
   #extern int rl_completion_query_items;
+
+  # Character appended to completed words when at the end of the line.  The
+  # default is a space.  Nothing is added if this is '\0'.
   #
-  #/* Character appended to completed words when at the end of the line.  The
-  #   default is a space.  Nothing is added if this is '\0'. */
   #extern int rl_completion_append_character;
+
+  # If set to non-zero by an application completion function,
+  # rl_completion_append_character will not be appended.
   #
-  #/* If set to non-zero by an application completion function,
-  #   rl_completion_append_character will not be appended. */
   #extern int rl_completion_suppress_append;
+
+  # Set to any quote character readline thinks it finds before any application
+  # completion function is called.
   #
-  #/* Set to any quote character readline thinks it finds before any application
-  #   completion function is called. */
   #extern int rl_completion_quote_character;
+
+  # Set to a non-zero value if readline found quoting anywhere in the word to
+  # be completed; set before any application completion function is called.
   #
-  #/* Set to a non-zero value if readline found quoting anywhere in the word to
-  #   be completed; set before any application completion function is called. */
   #extern int rl_completion_found_quote;
+
+  # If non-zero, the completion functions don't append any closing quote.
+  # This is set to 0 by rl_complete_internal and may be changed by an
+  # application-specific completion function.
   #
-  #/* If non-zero, the completion functions don't append any closing quote.
-  #   This is set to 0 by rl_complete_internal and may be changed by an
-  #   application-specific completion function. */
   #extern int rl_completion_suppress_quote;
+
+  # If non-zero, readline will sort the completion matches.  On by default.
   #
-  #/* If non-zero, readline will sort the completion matches.  On by default. */
   #extern int rl_sort_completion_matches;
+
+  # If non-zero, a slash will be appended to completed filenames that are
+  # symbolic links to directory names, subject to the value of the
+  # mark-directories variable (which is user-settable).  This exists so
+  # that application completion functions can override the user's preference
+  # (set via the mark-symlinked-directories variable) if appropriate.
+  # It's set to the value of _rl_complete_mark_symlink_dirs in
+  # rl_complete_internal before any application-specific completion
+  # function is called, so without that function doing anything, the user's
+  # preferences are honored.
   #
-  #/* If non-zero, a slash will be appended to completed filenames that are
-  #   symbolic links to directory names, subject to the value of the
-  #   mark-directories variable (which is user-settable).  This exists so
-  #   that application completion functions can override the user's preference
-  #   (set via the mark-symlinked-directories variable) if appropriate.
-  #   It's set to the value of _rl_complete_mark_symlink_dirs in
-  #   rl_complete_internal before any application-specific completion
-  #   function is called, so without that function doing anything, the user's
-  #   preferences are honored. */
   #extern int rl_completion_mark_symlink_dirs;
+
+  # If non-zero, then disallow duplicates in the matches.
   #
-  #/* If non-zero, then disallow duplicates in the matches. */
   #extern int rl_ignore_completion_duplicates;
+
+  # If this is non-zero, completion is (temporarily) inhibited, and the
+  # completion character will be inserted as any other.
   #
-  #/* If this is non-zero, completion is (temporarily) inhibited, and the
-  #   completion character will be inserted as any other. */
   #extern int rl_inhibit_completion;
-  #
+
   # Input error; can be returned by (*rl_getc_function) if readline is reading
   # a top-level command (RL_ISSTATE (RL_STATE_READCMD)).
 
@@ -1201,34 +1631,34 @@ class ReadLine {
 
   # Possible state values for rl_readline_state
   #
-  constant RL_STATE_NONE	 = 0x0000000;	# no state; before first call 
+  constant RL_STATE_NONE	 = 0x0000000; # no state; before first call 
 
-  constant RL_STATE_INITIALIZING = 0x0000001;	# initializing
-  constant RL_STATE_INITIALIZED	 = 0x0000002;	# initialization done
-  constant RL_STATE_TERMPREPPED	 = 0x0000004;	# terminal is prepped
-  constant RL_STATE_READCMD	 = 0x0000008;	# reading a command key
-  constant RL_STATE_METANEXT	 = 0x0000010;	# reading input after ESC
-  constant RL_STATE_DISPATCHING	 = 0x0000020;	# dispatching to a command
-  constant RL_STATE_MOREINPUT	 = 0x0000040;	# reading more input in a command function
-  constant RL_STATE_ISEARCH	 = 0x0000080;	# doing incremental search
-  constant RL_STATE_NSEARCH	 = 0x0000100;	# doing non-inc search
-  constant RL_STATE_SEARCH	 = 0x0000200;	# doing a history search
-  constant RL_STATE_NUMERICARG	 = 0x0000400;	# reading numeric argument
-  constant RL_STATE_MACROINPUT	 = 0x0000800;	# getting input from a macro
-  constant RL_STATE_MACRODEF	 = 0x0001000;	# defining keyboard macro
-  constant RL_STATE_OVERWRITE	 = 0x0002000;	# overwrite mode
-  constant RL_STATE_COMPLETING	 = 0x0004000;	# doing completion
-  constant RL_STATE_SIGHANDLER	 = 0x0008000;	# in readline sighandler
-  constant RL_STATE_UNDOING	 = 0x0010000;	# doing an undo
-  constant RL_STATE_INPUTPENDING = 0x0020000;   # rl_execute_next called 
-  constant RL_STATE_TTYCSAVED	 = 0x0040000;	# tty special chars saved
-  constant RL_STATE_CALLBACK	 = 0x0080000;	# using the callback interface
-  constant RL_STATE_VIMOTION	 = 0x0100000;	# reading vi motion arg
-  constant RL_STATE_MULTIKEY	 = 0x0200000;	# reading multiple-key command
-  constant RL_STATE_VICMDONCE	 = 0x0400000;	# entered vi command mode at least once
-  constant RL_STATE_REDISPLAYING = 0x0800000;	# updating terminal display
+  constant RL_STATE_INITIALIZING = 0x0000001; # initializing
+  constant RL_STATE_INITIALIZED	 = 0x0000002; # initialization done
+  constant RL_STATE_TERMPREPPED	 = 0x0000004; # terminal is prepped
+  constant RL_STATE_READCMD	 = 0x0000008; # reading a command key
+  constant RL_STATE_METANEXT	 = 0x0000010; # reading input after ESC
+  constant RL_STATE_DISPATCHING	 = 0x0000020; # dispatching to a command
+  constant RL_STATE_MOREINPUT	 = 0x0000040; # reading more input in a command function
+  constant RL_STATE_ISEARCH	 = 0x0000080; # doing incremental search
+  constant RL_STATE_NSEARCH	 = 0x0000100; # doing non-inc search
+  constant RL_STATE_SEARCH	 = 0x0000200; # doing a history search
+  constant RL_STATE_NUMERICARG	 = 0x0000400; # reading numeric argument
+  constant RL_STATE_MACROINPUT	 = 0x0000800; # getting input from a macro
+  constant RL_STATE_MACRODEF	 = 0x0001000; # defining keyboard macro
+  constant RL_STATE_OVERWRITE	 = 0x0002000; # overwrite mode
+  constant RL_STATE_COMPLETING	 = 0x0004000; # doing completion
+  constant RL_STATE_SIGHANDLER	 = 0x0008000; # in readline sighandler
+  constant RL_STATE_UNDOING	 = 0x0010000; # doing an undo
+  constant RL_STATE_INPUTPENDING = 0x0020000; # rl_execute_next called 
+  constant RL_STATE_TTYCSAVED	 = 0x0040000; # tty special chars saved
+  constant RL_STATE_CALLBACK	 = 0x0080000; # using the callback interface
+  constant RL_STATE_VIMOTION	 = 0x0100000; # reading vi motion arg
+  constant RL_STATE_MULTIKEY	 = 0x0200000; # reading multiple-key command
+  constant RL_STATE_VICMDONCE	 = 0x0400000; # entered vi command mode at least once
+  constant RL_STATE_REDISPLAYING = 0x0800000; # updating terminal display
 
-  constant RL_STATE_DONE	 = 0x1000000;	# done; accepted line
+  constant RL_STATE_DONE	 = 0x1000000; # done; accepted line
 
   #define RL_SETSTATE(x)	(rl_readline_state |= (x))
   #define#RL_UNSETSTATE(x)	(rl_readline_state &= ~(x))
@@ -1260,7 +1690,7 @@ class ReadLine {
     has Str $.macro;        # char *macro;
 
     # signal state
-    has int $.catchsigs; # int catchsigs;
+    has int $.catchsigs;     # int catchsigs;
     has int $.catchsigwinch; # int catchsigwinch;
 
     # search state
@@ -1287,37 +1717,43 @@ class ReadLine {
   #
   # rltypedefs.h -- Type declarations for readline functions. */
   #
-  #/* Bindable functions */
-  #typedef int rl_command_func_t (int, int);
+  # Bindable functions
   #
-  #/* Typedefs for the completion system */
+  #typedef int rl_command_func_t (int, int);
+
+  # Typedefs for the completion system
+  #
   #typedef char *rl_compentry_func_t (const char *, int);
   #typedef char **rl_completion_func_t (const char *, int, int);
-  #
+
   #typedef char *rl_quote_func_t (char *, int, char *);
   #typedef char *rl_dequote_func_t (char *, int);
-  #
+
   #typedef int rl_compignore_func_t (char **);
-  #
+
   #typedef void rl_compdisp_func_t (char **, int, int);
+
+  # Type for input and pre-read hook functions like rl_event_hook
   #
-  #/* Type for input and pre-read hook functions like rl_event_hook */
   #typedef int rl_hook_func_t (void);
+
+  # Input function type
   #
-  #/* Input function type */
   #typedef int rl_getc_func_t (FILE *);
-  #
+
   # Generic function that takes a character buffer (which could be the readline
   # line buffer) and an index into it (which could be rl_point) and returns
-  # an int. */
-  #typedef int rl_linebuf_func_t (char *, int);
+  # an int.
   #
-  #/* `Generic' function pointer typedefs */
+  #typedef int rl_linebuf_func_t (char *, int);
+
+  # `Generic' function pointer typedefs
+  #
   #typedef int rl_intfunc_t (int);
   ##define rl_ivoidfunc_t rl_hook_func_t
   #typedef int rl_icpfunc_t (char *);
   #typedef int rl_icppfunc_t (char **);
-  #
+
   #typedef void rl_voidfunc_t (void);
   #typedef void rl_vintfunc_t (int);
   #typedef void rl_vcpfunc_t (char *);
@@ -1327,47 +1763,58 @@ class ReadLine {
   #typedef char *rl_cpifunc_t (int);
   #typedef char *rl_cpcpfunc_t (char  *);
   #typedef char *rl_cpcppfunc_t (char  **);
+
+  #############################################################################
   #
-  #/* tilde.h: Externally available variables and function in libtilde.a. */
+  # tilde.h: Externally available variables and function in libtilde.a.
   #
   #typedef char *tilde_hook_func_t (char *);
+
+  # If non-null, this contains the address of a function that the application
+  # wants called before trying the standard tilde expansions.  The function
+  # is called with the text sans tilde, and returns a malloc()'ed string
+  # which is the expansion, or a NULL pointer if the expansion fails.
   #
-  #/* If non-null, this contains the address of a function that the application
-  #   wants called before trying the standard tilde expansions.  The function
-  #   is called with the text sans tilde, and returns a malloc()'ed string
-  #   which is the expansion, or a NULL pointer if the expansion fails. */
   #extern tilde_hook_func_t *tilde_expansion_preexpansion_hook;
+
+  # If non-null, this contains the address of a function to call if the
+  # standard meaning for expanding a tilde fails.  The function is called
+  # with the text (sans tilde, as in "foo"), and returns a malloc()'ed string
+  # which is the expansion, or a NULL pointer if there is no expansion.
   #
-  #/* If non-null, this contains the address of a function to call if the
-  #   standard meaning for expanding a tilde fails.  The function is called
-  #   with the text (sans tilde, as in "foo"), and returns a malloc()'ed string
-  #   which is the expansion, or a NULL pointer if there is no expansion. */
   #extern tilde_hook_func_t *tilde_expansion_failure_hook;
+
+  # When non-null, this is a NULL terminated array of strings which
+  # are duplicates for a tilde prefix.  Bash uses this to expand
+  # `=~' and `:~'.
   #
-  #/* When non-null, this is a NULL terminated array of strings which
-  #   are duplicates for a tilde prefix.  Bash uses this to expand
-  #   `=~' and `:~'. */
   #extern char **tilde_additional_prefixes;
+
+  # When non-null, this is a NULL terminated array of strings which match
+  # the end of a username, instead of just "/".  Bash sets this to
+  # `:' and `=~'.
   #
-  #/* When non-null, this is a NULL terminated array of strings which match
-  #   the end of a username, instead of just "/".  Bash sets this to
-  #   `:' and `=~'. */
   #extern char **tilde_additional_suffixes;
+
+  # Return a new string which is the result of tilde expanding STRING.
   #
-  #/* Return a new string which is the result of tilde expanding STRING. */
-  #extern char *tilde_expand (const char *);
+  sub tilde_expand( Str $filename ) returns Str
+    is native( LIB ) { * }
+  method tilde-expand( Str $filename ) returns Str {
+    tilde_expand( $filename ) }
+
+  # Do the work of tilde expansion on FILENAME.  FILENAME starts with a
+  # tilde.  If there is no expansion, call tilde_expansion_failure_hook.
   #
-  #/* Do the work of tilde expansion on FILENAME.  FILENAME starts with a
-  #   tilde.  If there is no expansion, call tilde_expansion_failure_hook. */
-  #extern char *tilde_expand_word (const char *);
-  #
+  sub tilde_expand_word( Str $filename ) returns Str
+    is native( LIB ) { * }
+  method tilde-expand-word( Str $filename ) returns Str {
+    tilde_expand_word( $filename ) }
+
   # Find the portion of the string beginning with ~ that should be expanded.
+  #
   #extern char *tilde_find_word (const char *, int, int *);
   #
   #############################################################################
 
-  sub readline( Str $prompt ) returns Str
-    is native( LIB ) { * }
-  method readline( Str $prompt ) {
-    readline( $prompt ) }
 }
