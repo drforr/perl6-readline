@@ -1,5 +1,8 @@
 use v6;
 use NativeCall;
+#
+# XXX &cglobal.signature -> (Any $libname, Any $symbol, Any $target-type)
+#
 
 class ReadLine {
   my constant LIB = 'libreadline.so.5';
@@ -339,12 +342,10 @@ class ReadLine {
   # error message.
   #
 
-# XXX Bug in type signatures?
-#
-#  sub history_expand( Str, Pointer[Str] ) returns Int
-#    is native( LIB ) { * }
-#  method history-expand( Str $string, Pointer[Str] $output ) returns Int {
-#    history_expand( $string, $output ) }
+  sub history_expand( Str, Pointer[Str] ) returns Int
+    is native( LIB ) { * }
+  method history-expand( Str $string, Pointer[Str] $output ) returns Int {
+    history_expand( $string, $output ) }
 
   # Extract a string segment consisting of the FIRST through LAST
   # arguments present in STRING.  Arguments are broken up as in
@@ -363,12 +364,10 @@ class ReadLine {
   # characters `:', ` ', `\t', `\n', and sometimes `?'.
   #
 
-# XXX Bug in type signatures?
-#
-#  sub get_history_event( Str, Pointer[Int], Int ) returns Str
-#    is native( LIB ) { * }
-#  method get-history-event( Str $string, Pointer[Int] $index, Int $delimiting-quote ) returns Str {
-#    get_history_event( $string, $index, $delimiting-quote ) }
+  sub get_history_event( Str, Pointer[Int], Int ) returns Str
+    is native( LIB ) { * }
+  method get-history-event( Str $string, Pointer[Int] $index, Int $delimiting-quote ) returns Str {
+    get_history_event( $string, $index, $delimiting-quote ) }
 
 
   # Return an array of tokens, much as the shell might.  The tokens are
@@ -778,12 +777,10 @@ class ReadLine {
   method rl-vi-check( ) returns Int {
     rl_vi_check() }
 
-# XXX Bug in type signatures?
-#
-#  sub rl_vi_domove( Int, Pointer[Int] ) returns Int
-#    is native( LIB ) { * }
-#  method rl-vi-domove( Int $i, Pointer[Int] $pi ) returns Int {
-#    rl_vi_domove( $i, $pi ) }
+  sub rl_vi_domove( Int, Pointer[Int] ) returns Int
+    is native( LIB ) { * }
+  method rl-vi-domove( Int $i, Pointer[Int] $pi ) returns Int {
+    rl_vi_domove( $i, $pi ) }
 
   sub rl_vi_bracktype( Int ) returns Int
     is native( LIB ) { * }
@@ -936,12 +933,10 @@ class ReadLine {
   method rl-macro-bind( Str $str, Str $b, Keymap $k ) returns Int {
     rl_macro_bind( $str, $b, $k ) }
 
-# XXX Bug in type signatures?
-#
-#  sub rl_translate_keyseq( Str, Str, Pointer[Int] ) returns Int
-#    is native( LIB ) { * }
-#  method rl-translate-keyseq( Str $str, Str $b, Pointer[Int] $k ) returns Int {
-#    rl_translate_keyseq( $str, $b, $k ) }
+  sub rl_translate_keyseq( Str, Str, Pointer[Int] ) returns Int
+    is native( LIB ) { * }
+  method rl-translate-keyseq( Str $str, Str $b, Pointer[Int] $k ) returns Int {
+    rl_translate_keyseq( $str, $b, $k ) }
 
   sub rl_untranslate_keyseq( Int ) returns Int
     is native( LIB ) { * }
@@ -953,14 +948,12 @@ class ReadLine {
   method rl-named-function( Str $s ) returns rl_command_func_t {
     rl_named_function( $s ) }
 
-# XXX Bug in type signatures?
-#
-#  sub rl_function_of_keyseq( Str, Keymap, Pointer[Int] )
-#    returns rl_command_func_t
-#    is native( LIB ) { * }
-#  method rl-function-of-keyseq( Str $s, Keymap $k, Pointer[Int] $p )
-#    returns rl_command_func_t {
-#      rl_function_of_keyseq( $s, $k, $p ) }
+  sub rl_function_of_keyseq( Str, Keymap, Pointer[Int] )
+    returns rl_command_func_t
+    is native( LIB ) { * }
+  method rl-function-of-keyseq( Str $s, Keymap $k, Pointer[Int] $p )
+    returns rl_command_func_t {
+      rl_function_of_keyseq( $s, $k, $p ) }
 
   sub rl_list_funmap_names( )
     is native( LIB ) { * }
@@ -974,12 +967,10 @@ class ReadLine {
     returns CArray[Str] {
       rl_invoking_keyseqs_in_map( $cb, $k ) }
 
-# XXX Bug in type signatures?
-#
-#  sub rl_invoking_keyseqs( rl_command_func_t ) returns CArray[Str]
-#    is native( LIB ) { * }
-#  method rl-invoking-keyseqs( rl_command_func_t $cb ) returns CArray[Str] {
-#    rl_invoking_keyseqs_in_map( $cb ) }
+  sub rl_invoking_keyseqs( rl_command_func_t ) returns CArray[Str]
+    is native( LIB ) { * }
+  method rl-invoking-keyseqs( rl_command_func_t $cb ) returns CArray[Str] {
+    rl_invoking_keyseqs( $cb ) }
 
   sub rl_function_dumper( Int )
     is native( LIB ) { * }
@@ -1009,8 +1000,15 @@ class ReadLine {
   # Functions for manipulating the funmap, which maps command names
   # to functions.
   #
-  #extern int rl_add_funmap_entry (const char *, rl_command_func_t *);
-  #extern const char **rl_funmap_names (void);
+  sub rl_add_funmap_entry( Str, rl_command_func_t ) returns Int
+    is native( LIB ) { * }
+  method rl-add-funmap-entry( Str $name, rl_command_func_t $cb ) returns Int {
+    rl_add_funmap_entry( $name, $cb ) }
+
+  sub rl_funmap_names( ) returns CArray[Str]
+    is native( LIB ) { * }
+  method rl-funmap-names( ) returns CArray[Str] {
+    rl_funmap_names( ) }
 
   # Utility functions for managing keyboard macros.
   #
@@ -1175,12 +1173,10 @@ class ReadLine {
   method rl-set-screen-size( Int $r, Int $c ) {
     rl_set_screen_size( $r, $c ) }
 
-# XXX Bug in type signatures?
-#
-#  sub rl_get_screen_size( Pointer[Int], Pointer[Int] )
-#    is native( LIB ) { * }
-#  method rl-get-screen-size( Pointer[Int] $r, Pointer[Int] $c ) {
-#    rl_get_screen_size( $r, $c ) }
+  sub rl_get_screen_size( Pointer[Int], Pointer[Int] )
+    is native( LIB ) { * }
+  method rl-get-screen-size( Pointer[Int] $r, Pointer[Int] $c ) {
+    rl_get_screen_size( $r, $c ) }
 
   sub rl_reset_screen_size( )
     is native( LIB ) { * }
