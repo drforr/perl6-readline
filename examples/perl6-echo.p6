@@ -6,7 +6,7 @@ my $readline = ReadLine.new;
 my %history;
 while my $response = $readline.readline( "prompt here (<cr> to exit)> " ) {
   if $response ~~ /ding/ {
-    $readline.ding;
+    $readline.rl-ding;
   }
   elsif $response ~~ /clear/ {
     $readline.clear-history;
@@ -14,11 +14,11 @@ while my $response = $readline.readline( "prompt here (<cr> to exit)> " ) {
   elsif $response ~~ /is \s+ stifled/ {
     say $readline.history-is-stifled ?? "Yes" !! "No";
   }
-  elsif $response ~~ /stifle/ {
-    $readline.stifle-history( 1 );
-  }
   elsif $response ~~ /unstifle/ {
     $readline.unstifle-history;
+  }
+  elsif $response ~~ /stifle/ {
+    $readline.stifle-history( 1 );
   }
   elsif $response ~~ /\S/ {
     unless %history{$response} {
