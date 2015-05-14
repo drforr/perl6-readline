@@ -1,12 +1,12 @@
 #!/usr/bin/env perl6
 use v6;
-use ReadLine;
+use Readline;
 
-my $readline = ReadLine.new;
+my $readline = Readline.new;
 my %history;
 while my $response = $readline.readline( "prompt here (<cr> to exit)> " ) {
   if $response ~~ /ding/ {
-    $readline.ding;
+    $readline.rl-ding;
   }
   elsif $response ~~ /clear/ {
     $readline.clear-history;
