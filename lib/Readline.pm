@@ -1981,12 +1981,14 @@ class Readline {
 
   # Completion functions.
   #
-  #extern int rl_complete_internal (int);
+  sub rl_complete_internal( Int ) returns Int
+    is native( LIB ) { * }
+  method rl-complete-internal( Int $i ) returns Int {
+    rl_complete_internal( $i ) }
+
   #extern void rl_display_match_list (char **, int, int);
 
   #extern char **rl_completion_matches (const char *, rl_compentry_func_t *);
-  #extern char *rl_username_completion_function (const char *, int);
-  #extern char *rl_filename_completion_function (const char *, int);
 
   sub rl_completion_mode( rl_command_func_t )
     returns Int
@@ -2619,8 +2621,9 @@ class Readline {
 
   # Find the portion of the string beginning with ~ that should be expanded.
   #
-  #extern char *tilde_find_word (const char *, int, int *);
-  #
-  #############################################################################
-
+  sub tilde_find_word( Str, Int, Pointer[Int] ) returns Str
+    is native( LIB ) { * }
+  method tilde-find-word( Str $str, Int $offset, Pointer[Int] $p-offset )
+    returns Str {
+      tilde_find_word( $str, $offset, $p-offset ) }
 }

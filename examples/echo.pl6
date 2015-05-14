@@ -14,11 +14,11 @@ while my $response = $readline.readline( "prompt here (<cr> to exit)> " ) {
   elsif $response ~~ /is \s+ stifled/ {
     say $readline.history-is-stifled ?? "Yes" !! "No";
   }
-  elsif $response ~~ /stifle/ {
-    $readline.stifle-history( 1 );
-  }
   elsif $response ~~ /unstifle/ {
     $readline.unstifle-history;
+  }
+  elsif $response ~~ /stifle/ {
+    $readline.stifle-history( 1 );
   }
   elsif $response ~~ /\S/ {
     unless %history{$response} {
