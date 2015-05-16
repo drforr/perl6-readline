@@ -237,7 +237,7 @@ Any chapter references in the documentation refer to the GNU Readline or GNU His
 
 =begin Callback
 
-=item rl-callback-handler-install( Str $s, rl_vcpfunc_t $cb )
+=item rl-callback-handler-install( Str $s, &callback (Str) )
 
     Set up the terminal for readline I/O and display the initial expanded value of prompt. Save the value of lhandler to use as a handler function to call when a complete line of input has been entered. The handler function receives the text of the line as an argument. 
 
@@ -265,11 +265,11 @@ Any chapter references in the documentation refer to the GNU Readline or GNU His
 
 =begin Binding
 
-=item rl-bind-key( Int $i, rl_command_func_t $cb ) returns Int
+=item rl-bind-key( Int $i, &callback (Int, Int --> Int) ) returns Int
 
     rl_bind_key() takes two arguments: key is the character that you want to bind, and function is the address of the function to call when key is pressed. Binding TAB to rl_insert() makes TAB insert itself. rl_bind_key() returns non-zero if key is not a valid ASCII character code (between 0 and 255).
 
-=item rl-bind-key-in-map( Int $i, rl_command_func_t $cb, Keymap $k ) returns Int
+=item rl-bind-key-in-map( Int $i, &callback (Int, Int --> Int), Keymap $k ) returns Int
 
     Bind key to function in map. Returns non-zero in the case of an invalid key. 
 =item rl-unbind-key( Int $i ) returns Int
@@ -280,31 +280,31 @@ Any chapter references in the documentation refer to the GNU Readline or GNU His
 
     Bind key to the null function in map. Returns non-zero in case of error. 
 
-=item rl-bind-key-if-unbound( Int $i, rl_command_func_t $cb ) returns Int
+=item rl-bind-key-if-unbound( Int $i, &callback (Int, Int --> Int) ) returns Int
 
     Binds key to function if it is not already bound in the currently active keymap. Returns non-zero in the case of an invalid key or if key is already bound. 
 
-=item rl-bind-key-if-unbound-in-map( Int $i, rl_command_func_t $cb, Keymap $k ) returns Int {
+=item rl-bind-key-if-unbound-in-map( Int $i, &callback (Int, Int --> Int), Keymap $k ) returns Int {
 
     Binds key to function if it is not already bound in map. Returns non-zero in the case of an invalid key or if key is already bound. 
 
-=item rl-unbind-function-in-map ( rl_command_func_t $cb, Keymap $k ) returns Int
+=item rl-unbind-function-in-map ( &callback (Int, Int --> Int), Keymap $k ) returns Int
 
     Unbind all keys that execute function in map. 
 
-=item rl-bind-keyseq( Str $str, rl_command_func_t $cb ) returns Int
+=item rl-bind-keyseq( Str $str, &callback (Int, Int --> Int) ) returns Int
 
     Bind the key sequence represented by the string keyseq to the function function, beginning in the current keymap. This makes new keymaps as necessary. The return value is non-zero if keyseq is invalid. 
 
-=item rl-bind-keyseq-in-map( Str $str, rl_command_func_t $cb, Keymap $k )
+=item rl-bind-keyseq-in-map( Str $str, &callback (Int, Int --> Int), Keymap $k )
 
     Bind the key sequence represented by the string keyseq to the function function. This makes new keymaps as necessary. Initial bindings are performed in map. The return value is non-zero if keyseq is invalid. 
 
-=item rl-bind-keyseq-if-unbound( Str $str, rl_command_func_t $cb ) returns Int
+=item rl-bind-keyseq-if-unbound( Str $str, &callback (Int, Int --> Int) ) returns Int
 
     Binds keyseq to function if it is not already bound in the currently active keymap. Returns non-zero in the case of an invalid keyseq or if keyseq is already bound. 
 
-=item rl-bind-keyseq-if-unbound-in-map( Str $str, rl_command_func_t $cb, Keymap $k ) returns Int
+=item rl-bind-keyseq-if-unbound-in-map( Str $str, &callback (Int, Int --> Int), Keymap $k ) returns Int
 
     Binds keyseq to function if it is not already bound in map. Returns non-zero in the case of an invalid keyseq or if keyseq is already bound. 
 
@@ -314,7 +314,7 @@ Any chapter references in the documentation refer to the GNU Readline or GNU His
 
 =end Binding
 
-=item rl-add-defun( Str $str, rl_command_func_t $cb, Int $i ) returns Int
+=item rl-add-defun( Str $str, &callback (Int, Int --> Int), Int $i ) returns Int
 
     Add name to the list of named functions. Make function be the function that gets called. If key is not -1, then bind it to function using rl_bind_key(). 
 
@@ -328,7 +328,7 @@ Any chapter references in the documentation refer to the GNU Readline or GNU His
 
     Make the Readline variable variable have value. This behaves as if the readline command `set variable value' had been executed in an inputrc file (see section 1.3.1 Readline Init File Syntax). 
 
-=item rl-set-key( Str $str, rl_command_func_t $cb, Keymap $k )
+=item rl-set-key( Str $str, &callback (Int, Int --> Int), Keymap $k )
 
     Equivalent to rl_bind_keyseq_in_map. 
 
@@ -336,11 +336,11 @@ Any chapter references in the documentation refer to the GNU Readline or GNU His
 
     Bind the key sequence keyseq to invoke the macro macro. The binding is performed in map. When keyseq is invoked, the macro will be inserted into the line. This function is deprecated; use rl_generic_bind() instead. 
 
-=item rl-named-function( Str $s ) returns rl_command_func_t
+=item rl-named-function( Str $s ) returns &callback (Int, Int --> Int)
 
     Return the function with name name. 
 
-=item rl-function-of-keyseq( Str $s, Keymap $k, Pointer[Int] $p ) returns rl_command_func_t
+=item rl-function-of-keyseq( Str $s, Keymap $k, Pointer[Int] $p ) returns &callback (Int, Int --> Int)
 
     Return the function invoked by keyseq in keymap map. If map is NULL, the current keymap is used. If type is not NULL, the type of the object is returned in the int variable it points to (one of ISFUNC, ISKMAP, or ISMACR). 
 
@@ -348,11 +348,11 @@ Any chapter references in the documentation refer to the GNU Readline or GNU His
 
     Print the names of all bindable Readline functions to rl_outstream. 
 
-=item rl-invoking-keyseqs-in-map( Pointer[rl_command_func_t] $p-cmd, Keymap $k ) returns Pointer[Str]
+=item rl-invoking-keyseqs-in-map( Pointer[&callback (Int, Int --> Int)] $p-cmd, Keymap $k ) returns Pointer[Str]
 
     Return an array of strings representing the key sequences used to invoke function in the keymap map. 
 
-=item rl-invoking-keyseqs( Pointer[rl_command_func_t] $p-cmd ) returns Pointer[Str]
+=item rl-invoking-keyseqs( Pointer[&callbak (Int, Int --> Int)] $p-cmd ) returns Pointer[Str]
 
     Return an array of strings representing the key sequences used to invoke function in the current keymap. 
 
@@ -376,7 +376,7 @@ Any chapter references in the documentation refer to the GNU Readline or GNU His
 
     Parse line as if it had been read from the inputrc file and perform any key bindings and variable assignments found (see section 1.3 Readline Init File). 
 
-=item rl-add-funmap-entry( Str $name, rl_command_func_t $cb ) returns Int
+=item rl-add-funmap-entry( Str $name, &callback (Int, Int --> Int) ) returns Int
 
     Add name to the list of bindable Readline command names, and make function the function to be called when name is invoked. 
 
@@ -564,7 +564,7 @@ If an application does not want to install a SIGWINCH handler, but is still inte
 
     A generator function for filename completion in the general case. text is a partial filename. The Bash source is a useful reference for writing application-specific completion functions (the Bash completion functions call this and other Readline functions). 
 
-=item rl-completion-mode( Pointer[rl_command_func_t] $cb ) returns Int
+=item rl-completion-mode( Pointer[&callback (Int, Int --> Int)] $cb ) returns Int
 
     Returns the appropriate value to pass to rl_complete_internal() depending on whether cfunc was called twice in succession and the values of the show-all-if-ambiguous and show-all-if-unmodified variables. Application-specific completion functions may use this function to present the same interface as rl_complete(). 
 
@@ -588,9 +588,10 @@ class Readline {
   my class histdata_t is repr('CPointer') { } # typedef char *histdata_t;
   my class time_t is repr('CPointer') { } # XXX probably already a native type.
   my class Keymap is repr('CPointer') { } # typedef KEYMAP_ENTRY *Keymap;
-  my class rl_vcpfunc_t is repr('CPointer') { } # typedef void rl_vcpfunc_t (char *);
+  # typedef void rl_vcpfunc_t (char *);
 
-  my class rl_command_func_t is repr('CPointer') { } #typedef int rl_command_func_t (int, int);
+#  my class rl_command_func_t is repr('CPointer') { } #typedef int rl_command_func_t (int, int);
+  my class rl_compentry_func_t is repr('CPointer') { } #typedef char *rl_compentry_func_t (const char *, int);
 
   constant meta_character_threshold = 0x07f; # Larger than this is Meta.
   constant meta_character_bit       = 0x080; # x0000000, must be on.
@@ -672,7 +673,7 @@ class Readline {
   # Place STRING at the end of the history list.
   # The associated data field (if any) is set to NULL.
   #
-  sub add_history( Str )
+  sub add_history( Str ) is export
     is native( LIB ) { * }
   method add-history( Str $history ) {
     add_history( $history ) }
@@ -1041,7 +1042,7 @@ class Readline {
 
   my class KEYMAP_ENTRY is repr('CStruct') {
     has byte              $.type;     # char type;
-    has rl_command_func_t $.function; # rl_command_func_t *function
+#    has rl_command_func_t $.function; # rl_command_func_t *function # XXX
   }
 
   # This must be large enough to hold bindings for all of the characters
@@ -1180,7 +1181,7 @@ class Readline {
   #
   my class FUNMAP is repr('CStruct') {
     has Str     $.name;     # const char *name;
-    has Pointer $.function; # rl_command_func_t *function;
+#    has Pointer $.function; # rl_command_func_t *function; # XXX
   }
 
   #extern FUNMAP **funmap;
@@ -1354,17 +1355,17 @@ class Readline {
   # Not available unless READLINE_CALLBACKS is defined.
   #
 
-  sub rl_callback_handler_install( Str, rl_vcpfunc_t )
-    is native( LIB ) { * }
-  method rl-callback-handler-install( Str $s, rl_vcpfunc_t $cb ) {
-    rl_callback_handler_install( $s, $cb ) }
+ sub rl_callback_handler_install( Str, &callback (Str) ) is export
+   is native( LIB ) { * }
+#  method rl-callback-handler-install( Str $s, &callback (Str) ) {
+#    rl_callback_handler_install( $s, $cb ) }
 
-  sub rl_callback_read_char( )
+  sub rl_callback_read_char( ) is export
     is native( LIB ) { * }
   method rl-callback-read-char( ) {
     rl_callback_read_char( ) }
  
-  sub rl_callback_handler_remove( )
+  sub rl_callback_handler_remove( ) is export
     is native( LIB ) { * }
   method rl-callback-handler-remove( ) {
     rl_callback_handler_remove( ) }
@@ -1439,7 +1440,7 @@ class Readline {
   #
   # Read a line of input.  Prompt with PROMPT.  A NULL PROMPT means none.
   #
-  sub readline( Str )
+  sub readline( Str ) is export
     returns Str
     is native( LIB ) { * }
   method readline( Str $prompt )
@@ -1469,20 +1470,19 @@ class Readline {
 
   # Utility functions to bind keys to readline commands.
   #
-  sub rl_bind_key( Int, rl_command_func_t )
+  sub rl_bind_key( Int, &callback (Int, Int --> Int) )
     returns Int
     is native( LIB ) { * }
-  method rl-bind-key( Int $i, rl_command_func_t $cb )
-    returns Int {
-    rl_bind_key( $i, $cb ) }
+#  method rl-bind-key( Int $i, &callback (Int, Int --> Int) )
+#    returns Int {
+#    rl_bind_key( $i, $cb ) }
 
-  sub rl_bind_key_in_map( Int, rl_command_func_t, Keymap )
+  sub rl_bind_key_in_map( Int, &callback (Int, Int --> Int), Keymap )
     returns Int
     is native( LIB ) { * }
-  method rl-bind-key-in-map( Int $i, rl_command_func_t $cb, Keymap $k )
-   
-    returns Int {
-    rl_bind_key_in_map( $i, $cb, $k ) }
+#  method rl-bind-key-in-map( Int $i, rl_command_func_t $cb, Keymap $k )
+#    returns Int {
+#    rl_bind_key_in_map( $i, $cb, $k ) }
 
   sub rl_unbind_key( Int )
     returns Int
@@ -1498,56 +1498,57 @@ class Readline {
     returns Int {
     rl_unbind_key_in_map( $i, $k ) }
 
-  sub rl_bind_key_if_unbound( Int, rl_command_func_t )
+  sub rl_bind_key_if_unbound( Int, &callback (Int, Int --> Int) )
     returns Int
     is native( LIB ) { * }
-  method rl-bind-key-if-unbound( Int $i, rl_command_func_t $cb )
-    returns Int {
-    rl_bind_key_if_unbound( $i, $cb ) }
+#  method rl-bind-key-if-unbound( Int $i, rl_command_func_t $cb )
+#    returns Int {
+#    rl_bind_key_if_unbound( $i, $cb ) }
 
-  sub rl_bind_key_if_unbound_in_map( Int, rl_command_func_t, Keymap )
+  sub rl_bind_key_if_unbound_in_map( Int, &callback (Int, Int --> Int), Keymap )
     returns Int
     is native( LIB ) { * }
-  method rl-bind-key-if-unbound-in-map
-    ( Int $i, rl_command_func_t $cb, Keymap $k )
-    returns Int {
-      rl_bind_key_if_unbound_in_map( $i, $cb, $k ) }
+#  method rl-bind-key-if-unbound-in-map
+#    ( Int $i, rl_command_func_t $cb, Keymap $k )
+#    returns Int {
+#      rl_bind_key_if_unbound_in_map( $i, $cb, $k ) }
 
-  sub rl_unbind_function_in_map( rl_command_func_t, Keymap )
+  sub rl_unbind_function_in_map( &callback (Int, Int --> Int), Keymap )
     returns Int
     is native( LIB ) { * }
-  method rl-unbind-function-in-map ( rl_command_func_t $cb, Keymap $k )
-    returns Int {
-      rl_unbind_function_in_map( $cb, $k ) }
+#  method rl-unbind-function-in-map ( rl_command_func_t $cb, Keymap $k )
+#    returns Int {
+#      rl_unbind_function_in_map( $cb, $k ) }
 
-  sub rl_bind_keyseq( Str, rl_command_func_t )
+  sub rl_bind_keyseq( Str, &callback (Int, Int --> Int) )
     returns Int
     is native( LIB ) { * }
-  method rl-bind-keyseq( Str $str, rl_command_func_t $cb )
-    returns Int {
-      rl_bind_keyseq( $str, $cb ) }
+#  method rl-bind-keyseq( Str $str, rl_command_func_t $cb )
+#    returns Int {
+#      rl_bind_keyseq( $str, $cb ) }
 
-  sub rl_bind_keyseq_in_map( Str, rl_command_func_t, Keymap )
+  sub rl_bind_keyseq_in_map( Str, &callback (Int, Int --> Int), Keymap )
     returns Int
     is native( LIB ) { * }
-  method rl-bind-keyseq-in-map( Str $str, rl_command_func_t $cb, Keymap $k )
-    returns Int {
-      rl_bind_keyseq_in_map( $str, $cb, $k ) }
+#  method rl-bind-keyseq-in-map( Str $str, rl_command_func_t $cb, Keymap $k )
+#    returns Int {
+#      rl_bind_keyseq_in_map( $str, $cb, $k ) }
 
-  sub rl_bind_keyseq_if_unbound( Str, rl_command_func_t )
+  sub rl_bind_keyseq_if_unbound( Str, &callback (Int, Int --> Int) )
     returns Int
     is native( LIB ) { * }
-  method rl-bind-keyseq-if-unbound( Str $str, rl_command_func_t $cb )
-   returns Int {
-    rl_bind_keyseq_if_unbound( $str, $cb ) }
+#  method rl-bind-keyseq-if-unbound( Str $str, rl_command_func_t $cb )
+#   returns Int {
+#    rl_bind_keyseq_if_unbound( $str, $cb ) }
 
-  sub rl_bind_keyseq_if_unbound_in_map( Str, rl_command_func_t, Keymap )
+  sub rl_bind_keyseq_if_unbound_in_map
+    ( Str, &callback (Int, Int --> Int), Keymap )
     returns Int
     is native( LIB ) { * }
-  method rl-bind-keyseq-if-unbound-in-map
-    ( Str $str, rl_command_func_t $cb, Keymap $k )
-    returns Int {
-      rl_bind_keyseq_if_unbound_in_map( $str, $cb, $k ) }
+#  method rl-bind-keyseq-if-unbound-in-map
+#    ( Str $str, rl_command_func_t $cb, Keymap $k )
+#    returns Int {
+#      rl_bind_keyseq_if_unbound_in_map( $str, $cb, $k ) }
 
   sub rl_generic_bind( Int, Str, Str, Keymap )
     returns Int
@@ -1557,12 +1558,12 @@ class Readline {
     rl_generic_bind( $i, $s, $t, $k ) }
 
 
-  sub rl_add_defun( Str, rl_command_func_t, Int )
+  sub rl_add_defun( Str, &callback (Int, Int --> Int), Int )
     returns Int
     is native( LIB ) { * }
-  method rl-add-defun( Str $str, rl_command_func_t $cb, Int $i )
-    returns Int {
-    rl_add_defun( $str, $cb, $i ) }
+#  method rl-add-defun( Str $str, rl_command_func_t $cb, Int $i )
+#    returns Int {
+#    rl_add_defun( $str, $cb, $i ) }
 
   sub rl_variable_value( Str )
     returns Str
@@ -1580,12 +1581,12 @@ class Readline {
 
   # Backwards compatibility, use rl_bind_keyseq_in_map instead.
   #
-  sub rl_set_key( Str, rl_command_func_t, Keymap )
+  sub rl_set_key( Str, &callback (Int, Int --> Int), Keymap )
     returns Int
     is native( LIB ) { * }
-  method rl-set-key( Str $str, rl_command_func_t $cb, Keymap $k )
-    returns Int {
-      rl_set_key( $str, $cb, $k ) }
+#  method rl-set-key( Str $str, rl_command_func_t $cb, Keymap $k )
+#    returns Int {
+#      rl_set_key( $str, $cb, $k ) }
 
   # Backwards compatibility, use rl_generic_bind instead.
   #
@@ -1610,38 +1611,42 @@ class Readline {
     returns Int {
     rl_untranslate_keyseq( $i ) }
 
-  sub rl_named_function( Str )
-    returns rl_command_func_t
-    is native( LIB ) { * }
-  method rl-named-function( Str $s )
-    returns rl_command_func_t {
-    rl_named_function( $s ) }
+# XXX Not sure how to return callback type.
+#
+#  sub rl_named_function( Str )
+#    returns &callback (Int, Int --> Int)
+#    is native( LIB ) { * }
+#  method rl-named-function( Str $s )
+#    returns rl_command_func_t {
+#    rl_named_function( $s ) }
 
-  sub rl_function_of_keyseq( Str, Keymap, Pointer[Int] )
-    returns rl_command_func_t
-    is native( LIB ) { * }
-  method rl-function-of-keyseq( Str $s, Keymap $k, Pointer[Int] $p )
-    returns rl_command_func_t {
-      rl_function_of_keyseq( $s, $k, $p ) }
+# XXX Not sure how to return callback type.
+#
+#  sub rl_function_of_keyseq( Str, Keymap, Pointer[Int] )
+#    returns &callback (Int, Int --> Int)
+#    is native( LIB ) { * }
+#  method rl-function-of-keyseq( Str $s, Keymap $k, Pointer[Int] $p )
+#    returns rl_command_func_t {
+#      rl_function_of_keyseq( $s, $k, $p ) }
 
   sub rl_list_funmap_names( )
     is native( LIB ) { * }
   method rl-list-funmap-names( ) {
     rl_list_funmap_names( ) }
 
-  sub rl_invoking_keyseqs_in_map( rl_command_func_t, Keymap )
+  sub rl_invoking_keyseqs_in_map( &callback (Int, Int --> Int), Keymap )
     returns CArray[Str]
     is native( LIB ) { * }
-  method rl-invoking-keyseqs-in-map( rl_command_func_t $cb, Keymap $k )
-    returns CArray[Str] {
-      rl_invoking_keyseqs_in_map( $cb, $k ) }
+#  method rl-invoking-keyseqs-in-map( rl_command_func_t $cb, Keymap $k )
+#    returns CArray[Str] {
+#      rl_invoking_keyseqs_in_map( $cb, $k ) }
 
-  sub rl_invoking_keyseqs( rl_command_func_t )
+  sub rl_invoking_keyseqs( &callback (Int, Int --> Int) )
     returns CArray[Str]
     is native( LIB ) { * }
-  method rl-invoking-keyseqs( rl_command_func_t $cb )
-    returns CArray[Str] {
-    rl_invoking_keyseqs( $cb ) }
+#  method rl-invoking-keyseqs( rl_command_func_t $cb )
+#    returns CArray[Str] {
+#    rl_invoking_keyseqs( $cb ) }
 
   sub rl_function_dumper( Int )
     is native( LIB ) { * }
@@ -1673,12 +1678,12 @@ class Readline {
   # Functions for manipulating the funmap, which maps command names
   # to functions.
   #
-  sub rl_add_funmap_entry( Str, rl_command_func_t )
+  sub rl_add_funmap_entry( Str, &callback (Int, Int --> Int) )
     returns Int
     is native( LIB ) { * }
-  method rl-add-funmap-entry( Str $name, rl_command_func_t $cb )
-    returns Int {
-    rl_add_funmap_entry( $name, $cb ) }
+#  method rl-add-funmap-entry( Str $name, rl_command_func_t $cb )
+#    returns Int {
+#    rl_add_funmap_entry( $name, $cb ) }
 
   sub rl_funmap_names( )
     returns CArray[Str]
@@ -1696,7 +1701,10 @@ class Readline {
 
   # Functions for undoing, from undo.c
   #
-  #extern void rl_add_undo (enum undo_code, int, int, char *);
+  sub rl_add_undo( Int, Int, Int, Str ) # XXX first arg is undo_code
+    is native( LIB ) { * }
+  method rl-add-undo( Int $code, Int $a, Int $b, Str $mark ) {
+    rl_add_undo( $code, $a, $b, $mark ) }
 
   sub rl_free_undo_list( )
     is native( LIB ) { * }
@@ -1903,12 +1911,37 @@ class Readline {
 
   # Functions for character input.
   #
-  #extern int rl_stuff_char (int);
-  #extern int rl_execute_next (int);
-  #extern int rl_clear_pending_input (void);
-  #extern int rl_read_key (void);
   #extern int rl_getc (FILE *);
   #extern int rl_set_keyboard_input_timeout (int);
+
+  sub rl_stuff_char( Int )
+    returns Int
+    is native( LIB ) { * }
+  method rl-stuff-char( Int $c )
+    returns Int {
+    rl_stuff_char( $c ) }
+
+  sub rl_execute_next( Int )
+    returns Int
+    is native( LIB ) { * }
+  method rl-execute-next( Int $c )
+    returns Int {
+    rl_execute_next( $c ) }
+
+  sub rl_clear_pending_input( )
+    returns Int
+    is native( LIB ) { * }
+  method rl-clear-pending-input( )
+    returns Int {
+    rl_clear_pending_input( ) }
+
+  sub rl_read_key( )
+    returns Int
+    is native( LIB ) { * }
+  method rl-read-key( )
+    returns Int {
+    rl_read_key( ) }
+
 
   # `Public' utility functions.
   #
@@ -1986,16 +2019,26 @@ class Readline {
   method rl-complete-internal( Int $i ) returns Int {
     rl_complete_internal( $i ) }
 
-  #extern void rl_display_match_list (char **, int, int);
-
-  #extern char **rl_completion_matches (const char *, rl_compentry_func_t *);
-
-  sub rl_completion_mode( rl_command_func_t )
+  sub rl_display_match_list( CArray[Str], Int, Int )
     returns Int
     is native( LIB ) { * }
-  method rl-completion-mode( rl_command_func_t $cb )
+  method rl-display-match-list( CArray[Str] $list, Int $a, Int $b )
     returns Int {
-    rl_completion_mode( $cb ) }
+    rl_display_match_list( $list, $a, $b ) }
+
+  sub rl_completion_matches( Str, rl_compentry_func_t )
+    returns Pointer[Str]
+    is native( LIB ) { * }
+  method rl-completion-matches( Str $str, rl_compentry_func_t $cb )
+    returns Pointer[Str] {
+    rl_completion_matches( $str, $cb ) }
+
+  sub rl_completion_mode( &callback (Int, Int --> Int) )
+    returns Int
+    is native( LIB ) { * }
+#  method rl-completion-mode( rl_command_func_t $cb )
+#    returns Int {
+#    rl_completion_mode( $cb ) }
 
   ############################################################
   #  							     #
@@ -2088,6 +2131,11 @@ class Readline {
 
   # The input and output streams.
   #
+#my $GlobalInt := cglobal('./10-cglobals', 'GlobalInt', int32);
+
+  # XXX sizeof(FILE*) width.
+  our $rl_instream := cglobal( LIB, 'rl_instream', num64 ); # 64-bit pointer
+
   #extern FILE *rl_instream;
   #extern FILE *rl_outstream;
 
