@@ -4,6 +4,6 @@ use Test;
 
 plan 1;
 
-use ReadLine;
+use Readline;
 
-ok 1, "'use ReadLine' worked!";
+ok 1, "'use Readline' worked!";
