@@ -183,11 +183,13 @@ These methods let you add, delete and manipulate history entries. See the L<exam
 
     Extract a string segment consisting of the C<$first> through C<$last> arguments present in C<$string>. Arguments are split using C<history_tokenize()>.
 
-=item get-history-event( Str $string, Pointer[Int] $cIndex, Int $delimiting-quote ) returns Str
+=item get-history-event( Str $string, Pointer[Int] $cIndex, Str $delimiting-quote ) returns Str
 
     Returns the text of the history event beginning C<$$cIndex> characters into C<$string>.  C<$$cIndex> is modified to point to after the event specifier. At function entry, C<$cIndex> points to the index into string where the history event specification begins. qchar is a character that is allowed to end the event specification in addition to the "normal" terminating characters.
 
     Editor's note: C<$$cIndex> may be a byte offset into C<$string> rather than a character offset, so Unicode users beware.
+
+    Editor's note - C<$delimiting-quote> is an integer in the underlying C API - If you want to use the actual C function call, please call C<rl_get_history_event()> instead.
 
     DELIMITING_QUOTE is a character that is allowed to end the string specification for what to search for in addition to the normal characters `:', ` ', `\t', `\n', and sometimes `?'.
 
@@ -273,35 +275,47 @@ These methods manage the readline prompt.
 
 =begin Binding
 
-=item rl-bind-key( Int $key, &callback (Int, Int --> Int) ) returns Int
+=item rl-bind-key( Str $key, &callback (Int, Int --> Int) ) returns Int
 
     rl_bind_key() takes two arguments: C<$key> is the character that you want to bind, and the callback function is called when key is pressed. Binding TAB to C<rl_insert()> makes TAB insert itself. C<rl_bind_key()> returns non-zero if key is not a valid ASCII character code (between 0 and 255).
 
-=item rl-bind-key-in-map( Int $key, &callback (Int, Int --> Int), Keymap $map ) returns Int
+    Editor's note - C<$key> is an integer in the underlying C API - If you want to use the actual C function call, please call C<rl_bind_key()> instead.
+
+=item rl-bind-key-in-map( Str $key, &callback (Int, Int --> Int), Keymap $map ) returns Int
 
     Bind C<$key> to function in C<$map>. Returns non-zero in the case of an invalid key.
+
+    Editor's note - C<$delimiting-quote> is an integer in the underlying C API - If you want to use the actual C function call, please call C<rl_bind_key_in_map()> instead.
 
 =item rl-unbind-key( Int $key ) returns Bool
 
     Bind C<$key> to the null function in the currently active keymap. Returns C<False> in case of error.
 
+    Editor's note - C<$key> is an integer in the underlying C API - If you want to use the actual C function call, please call C<rl_unbind_key()> instead.
+
     Editor's note - The underlying C function returns non-zero on error, this is mapped onto a Perl6 Bool type. If you want the original behavior, call the underlying C<rl_unbind_key()> function rather than the Perl6 layer.
 
-=item rl-unbind-key-in-map( Int $key, Keymap $map ) returns Bool
+=item rl-unbind-key-in-map( Str $key, Keymap $map ) returns Bool
 
     Bind C<$key> to the null function in C<$map>. Returns False in case of error.
 
+    Editor's note - C<$key> is an integer in the underlying C API - If you want to use the actual C function call, please call C<rl_unbind_key_in_map()> instead.
+
     Editor's note - The underlying C function returns non-zero on error, this is mapped onto a Perl6 Bool type. If you want the original behavior, call the underlying C<rl_unbind_key_in_map()> function rather than the Perl6 layer.
 
-=item rl-bind-key-if-unbound( Int $key, &callback (Int, Int --> Int) ) returns Bool
+=item rl-bind-key-if-unbound( Str $key, &callback (Int, Int --> Int) ) returns Bool
 
     Binds C<$key> to function if it is not already bound in the currently active keymap. Returns False in the case of an invalid key or if key is already bound.
 
+    Editor's note - C<$key> is an integer in the underlying C API - If you want to use the actual C function call, please call C<rl_bind_key_if_unbound()> instead.
+
     Editor's note - The underlying C function returns non-zero on error, this is mapped onto a Perl6 Bool type. If you want the original behavior, call the underlying C<rl_bind_key_if_unbound()> function rather than the Perl6 layer.
 
-=item rl-bind-key-if-unbound-in-map( Int $key, &callback (Int, Int --> Int), Keymap $map ) returns Bool
+=item rl-bind-key-if-unbound-in-map( Str $key, &callback (Int, Int --> Int), Keymap $map ) returns Bool
 
     Binds C<$key> to function if it is not already bound in C<$map>. Returns False in the case of an invalid key or if C<$key> is already bound.
+
+    Editor's note - C<$key> is an integer in the underlying C API - If you want to use the actual C function call, please call C<rl_bind_key_if_unbound_in_map()> instead.
 
     Editor's note - The underlying C function returns non-zero on error, this is mapped onto a Perl6 Bool type. If you want the original behavior, call the underlying C<rl_bind_keyseq()> function rather than the Perl6 layer.
 
@@ -333,15 +347,17 @@ These methods manage the readline prompt.
 
     Editor's note - The underlying C function returns non-zero on error, this is mapped onto a Perl6 Bool type. If you want the original behavior, call the underlying C<rl_bind_keyseq_if_unbound_in_map()> function rather than the Perl6 layer.
 
-=item rl-generic-bind( Int $i, Str $s, Str $t, Keymap $map ) returns Int
+=item rl-generic-bind( Int $i, Str $keyseq, Str $t, Keymap $map ) returns Int
 
-    Bind the key sequence represented by the string keyseq to the arbitrary pointer data. type says what kind of data is pointed to by data; this can be a function (ISFUNC), a macro (ISMACR), or a keymap (ISKMAP). This makes new keymaps as necessary. The initial keymap in which to do bindings is map.
+    Bind the key sequence represented by the string C<$keyseq> to the arbitrary pointer data. type says what kind of data is pointed to by data; this can be a function (ISFUNC), a macro (ISMACR), or a keymap (ISKMAP). This makes new keymaps as necessary. The initial keymap in which to do bindings is map.
 
 =end Binding
 
-=item rl-add-defun( Str $str, &callback (Int, Int --> Int), Int $i ) returns Int
+=item rl-add-defun( Str $str, &callback (Int, Int --> Int), Str $key ) returns Int
 
-    Add name to the list of named functions. Make function be the function that gets called. If key is not -1, then bind it to function using rl_bind_key().
+    Add name to the list of named functions. Make function be the function that gets called. If C<$key> is not -1, then bind it to function using rl_bind_key().
+
+    Editor's note - C<$key> is an integer in the underlying C API - If you want to use the actual C function call, please call C<rl_add_defun()> instead.
 
     Using this function alone is sufficient for most applications. It is the recommended way to add a few functions to the default functions that Readline has built in. If you need to do something other than adding a function to Readline, you may need to use the underlying functions described below.
 
@@ -353,7 +369,7 @@ These methods manage the readline prompt.
 
     Make the Readline variable C<$variable> have value C<$alue>. This behaves as if the readline command `set variable value' had been executed in an inputrc file (see section 1.3.1 Readline Init File Syntax).
 
-=item rl-set-key( Str $str, &callback (Int, Int --> Int), Keymap $k )
+=item rl-set-key( Str $str, &callback (Int, Int --> Int), Keymap $map )
 
     Equivalent to C<rl-bind-keyseq-in-map()>.
 
@@ -469,9 +485,11 @@ These methods manage the readline prompt.
 
     Move the cursor to the start of the next screen line.
 
-=item rl-show-char( Int $c ) returns Int
+=item rl-show-char( Str $c ) returns Int
 
     Display character c on rl_outstream. If Readline has not been set to display meta characters directly, this will convert meta characters to a meta-prefixed key sequence. This is intended for use by applications which wish to do their own redisplay.
+
+    Editor's note - C<$key> is an integer in the underlying C API - If you want to use the actual C function call, please call C<rl_show_char()> instead.
 
 =item rl-save-prompt( )
 
@@ -547,11 +565,13 @@ If an application does not want to install a SIGWINCH handler, but is still inte
 
     Ensure that rl_line_buffer has enough space to hold C<$len> characters, possibly reallocating it if necessary.
 
-=item rl-alphabetic( Int $c ) returns Bool
+=item rl-alphabetic( Str $c ) returns Bool
 
     Return True if c is an alphabetic character.
 
     Editor's note - The underlying C function returns non-zero on error, this is mapped onto a Perl6 Bool type. If you want the original behavior, call the underlying C<rl_alphabetic()> function rather than the Perl6 layer.
+
+    Editor's note - C<$c> is an integer in the underlying C API - If you want to use the actual C function call, please call C<rl_alphabetic()> instead.
 
 =item rl-free( Pointer $mem )
 
@@ -593,41 +613,41 @@ These methods manipulate signal handling for L<Readline>.
 
     Set the time interval (in microseconds) that Readline waits when showing a balancing character when blink-matching-paren has been enabled.
 
-=item rl-complete-internal( Int $i ) returns Int
+=item rl-complete-internal( Int $what-to-do ) returns Int
 
-    Complete the word at or before point. what_to_do says what to do with the completion. A value of `?' means list the possible completions. `TAB' means do standard completion. `*' means insert all of the possible completions. `!' means to display all of the possible completions, if there is more than one, as well as performing partial completion. `@' is similar to `!', but possible completions are not listed if the possible completions share a common prefix.
+    Complete the word at or before point. C<$what-to-do> says what to do with the completion. A value of `?' means list the possible completions. `TAB' means do standard completion. `*' means insert all of the possible completions. `!' means to display all of the possible completions, if there is more than one, as well as performing partial completion. `@' is similar to `!', but possible completions are not listed if the possible completions share a common prefix.
 
-=item rl-username-completion-function ( Str $s, Int $i ) returns Str
+=item rl-username-completion-function ( Str $text, Int $i ) returns Str
 
-    A completion generator for usernames. text contains a partial username preceded by a random character (usually `~'). As with all completion generators, state is zero on the first call and non-zero for subsequent calls.
+    A completion generator for usernames. C<$text> contains a partial username preceded by a random character (usually `~'). As with all completion generators, state is zero on the first call and non-zero for subsequent calls.
 
-=item rl-filename-completion-function ( Str $s, Int $i ) returns Str
+=item rl-filename-completion-function ( Str $text, Int $i ) returns Str
 
-    A generator function for filename completion in the general case. text is a partial filename. The Bash source is a useful reference for writing application-specific completion functions (the Bash completion functions call this and other Readline functions).
+    A generator function for filename completion in the general case. C<$text> is a partial filename. The Bash source is a useful reference for writing application-specific completion functions (the Bash completion functions call this and other Readline functions).
 
-=item rl-completion-mode( Pointer[&callback (Int, Int --> Int)] $cb ) returns Int
+=item rl-completion-mode( Pointer[&callback (Int, Int --> Int)] $cfunc ) returns Int
 
-    Returns the appropriate value to pass to rl_complete_internal() depending on whether cfunc was called twice in succession and the values of the show-all-if-ambiguous and show-all-if-unmodified variables. Application-specific completion functions may use this function to present the same interface as rl_complete().
+    Returns the appropriate value to pass to C<rl_complete_internal()> depending on whether C<$cfunc> was called twice in succession and the values of the show-all-if-ambiguous and show-all-if-unmodified variables. Application-specific completion functions may use this function to present the same interface as rl_complete().
 
-=item rl-save-state( readline_state $state ) returns Int
+=item rl-save-state( readline_state $sp ) returns Int
 
-    Save a snapshot of Readline's internal state to sp. The contents of the readline_state structure are documented in `readline.h'. The caller is responsible for allocating the structure.
+    Save a snapshot of Readline's internal state to C<$sp>. The contents of the readline_state structure are documented in `readline.h'. The caller is responsible for allocating the structure.
 
 =item tilde-expand( Str $str ) returns Str
 
-    Return a new string which is the result of tilde-expanding $str
+    Return a new string which is the result of tilde-expanding C<$str>.
 
-=item tilde-expand-word( Str $str ) returns Str
+=item tilde-expand-word( Str $filename ) returns Str
 
-    Do the work of tilde expansion on FILENAME.  FILENAME starts with a tilde.  If there is no expansion, call tilde_expansion_failure_hook.
+    Do the work of tilde expansion on C<$filename>.  C<$filename> starts with a tilde.  If there is no expansion, call C<$tilde_expansion_failure_hook>.
 
 =item tilde-find-word( Str, Int, Pointer[Int] ) returns Str
 
     Find the portion of the string beginning with ~ that should be expanded.
 
-=item rl-restore-state( readline_state $state ) returns Int
+=item rl-restore-state( readline_state $sp ) returns Int
 
-    Restore Readline's internal state to that stored in sp, which must have been saved by a call to rl_save_state. The contents of the readline_state structure are documented in `readline.h'. The caller is responsible for freeing the structure.
+    Restore Readline's internal state to that stored in C<$sp>, which must have been saved by a call to C<rl_save_state()>. The contents of the readline_state structure are documented in `readline.h'. The caller is responsible for freeing the structure.
 
 =end METHODS
 
@@ -938,9 +958,9 @@ class Readline {
   sub get_history_event( Str, Pointer[Int], Int )
     returns Str
     is native( LIB ) { * }
-  method get-history-event( Str $string, Pointer[Int] $index, Int $delimiting-quote )
+  method get-history-event( Str $string, Pointer[Int] $index, Str $delimiting-quote )
     returns Str {
-    get_history_event( $string, $index, $delimiting-quote ) }
+    get_history_event( $string, $index, ord( $delimiting-quote.substring(0,1) ) ) }
 
 
   sub history_tokenize( Str )
@@ -1396,45 +1416,45 @@ class Readline {
   sub rl_bind_key( Int, &callback (Int, Int --> Int) )
     returns Int
     is native( LIB ) { * }
-#  method rl-bind-key( Int $i, &callback (Int, Int --> Int) )
+#  method rl-bind-key( Str $key, &callback (Int, Int --> Int) )
 #    returns Int {
-#    rl_bind_key( $i, $cb ) }
+#    rl_bind_key( ord( $key.substring(0,1) ), $cb ) }
 
   sub rl_bind_key_in_map( Int, &callback (Int, Int --> Int), Keymap )
     returns Int
     is native( LIB ) { * }
-#  method rl-bind-key-in-map( Int $i, rl_command_func_t $cb, Keymap $k )
+#  method rl-bind-key-in-map( Str $key, rl_command_func_t $cb, Keymap $k )
 #    returns Int {
-#    rl_bind_key_in_map( $i, $cb, $k ) }
+#    rl_bind_key_in_map( ord( $key.substring(0,1) ), $cb, $k ) }
 
   sub rl_unbind_key( Int )
     returns Int
     is native( LIB ) { * }
-  method rl-unbind-key( Int $i )
+  method rl-unbind-key( Str $key )
     returns Bool {
-    rl_unbind_key( $i ) != 0 ?? False !! True }
+    rl_unbind_key( ord( $key.substring(0,1) ) ) != 0 ?? False !! True }
 
   sub rl_unbind_key_in_map( Int, Keymap )
     returns Int
     is native( LIB ) { * }
-  method rl-unbind-key-in-map( Int $i, Keymap $k )
+  method rl-unbind-key-in-map( Str $key, Keymap $k )
     returns Bool {
-    rl_unbind_key_in_map( $i, $k ) != 0 ?? False !! True }
+    rl_unbind_key_in_map( ord( $key.substring(0,1) ), $k ) != 0 ?? False !! True }
 
   sub rl_bind_key_if_unbound( Int, &callback (Int, Int --> Int) )
     returns Int
     is native( LIB ) { * }
-#  method rl-bind-key-if-unbound( Int $i, rl_command_func_t $cb )
+#  method rl-bind-key-if-unbound( Str $key, rl_command_func_t $cb )
 #    returns Int {
-#    rl_bind_key_if_unbound( $i, $cb ) }
+#    rl_bind_key_if_unbound( ord( $key.substring(0,1) ), $cb ) }
 
   sub rl_bind_key_if_unbound_in_map( Int, &callback (Int, Int --> Int), Keymap )
     returns Int
     is native( LIB ) { * }
 #  method rl-bind-key-if-unbound-in-map
-#    ( Int $i, rl_command_func_t $cb, Keymap $k )
+#    ( Str $key, rl_command_func_t $cb, Keymap $k )
 #    returns Bool {
-#      rl_bind_key_if_unbound_in_map( $i, $cb, $k ) != 0 ?? False !! True }
+#      rl_bind_key_if_unbound_in_map( ord( $key.substring(0,1) ), $cb, $k ) != 0 ?? False !! True }
 
   sub rl_unbind_function_in_map( &callback (Int, Int --> Int), Keymap )
     returns Int
@@ -1483,9 +1503,9 @@ class Readline {
   sub rl_add_defun( Str, &callback (Int, Int --> Int), Int )
     returns Int
     is native( LIB ) { * }
-#  method rl-add-defun( Str $str, rl_command_func_t $cb, Int $i )
+#  method rl-add-defun( Str $str, rl_command_func_t $cb, Str $key )
 #    returns Int {
-#    rl_add_defun( $str, $cb, $i ) }
+#    rl_add_defun( $str, $cb, ord( $key.substring(0,1) ) ) }
 
   sub rl_variable_value( Str )
     returns Str
@@ -1881,9 +1901,9 @@ class Readline {
   sub rl_alphabetic( Int )
     returns Int
     is native( LIB ) { * }
-  method rl-alphabetic( Int $c )
+  method rl-alphabetic( Str $c )
     returns Bool {
-    rl_alphabetic( $c ) == 1 ?? True !! False }
+    rl_alphabetic( ord( $c.substring(0,1) ) ) == 1 ?? True !! False }
 
   sub rl_free( Pointer )
     is native( LIB ) { * }
@@ -1937,8 +1957,8 @@ class Readline {
   #
   sub rl_complete_internal( Int ) returns Int
     is native( LIB ) { * }
-  method rl-complete-internal( Int $i ) returns Int {
-    rl_complete_internal( $i ) }
+  method rl-complete-internal( Int $what-to-do ) returns Int {
+    rl_complete_internal( $what-to-do ) }
 
   sub rl_display_match_list( CArray[Str], Int, Int )
     returns Int
@@ -1950,9 +1970,9 @@ class Readline {
   sub rl_completion_matches( Str, &callback (Str, Int --> Str) )
     returns Pointer[Str]
     is native( LIB ) { * }
-#  method rl-completion-matches( Str $str, rl_compentry_func_t $cb )
+#  method rl-completion-matches( Str $text, rl_compentry_func_t $cb )
 #    returns Pointer[Str] {
-#    rl_completion_matches( $str, $cb ) }
+#    rl_completion_matches( $text, $cb ) }
 
   sub rl_completion_mode( &callback (Int, Int --> Int) )
     returns Int
