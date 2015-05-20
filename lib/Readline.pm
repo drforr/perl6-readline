@@ -44,7 +44,7 @@ Any chapter references in the documentation refer to the GNU Readline or GNU His
 
 =item rl-ding( ) returns Int
 
-    Ring the terminal bell, obeying the setting of bell-style.
+    Ring the terminal bell, obeying the setting of C<$bell-style>.
 
 =begin History
 
