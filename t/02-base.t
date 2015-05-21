@@ -2,7 +2,7 @@ use v6;
 
 use Test;
 
-plan 7;
+plan 41;
 
 use Readline;
 
@@ -643,6 +643,7 @@ my $histdata-t;
 my $time-t;
 my $size;
 my $map;
+my $readline-state;
 
 ### 
 ### =item readline( Str $prompt ) returns Str
@@ -671,7 +672,8 @@ subtest sub {
            'remove-history';
   lives_ok { $histdata-t = $r.free-history-entry( $history-state ) },
            'free-history-entry';
-  lives_ok { $history-state = $r.replace-history-entry( 0, 'bar', $histdata-t ) },
+  lives_ok { $history-state =
+               $r.replace-history-entry( 0, 'bar', $histdata-t ) },
            'remove-history';
   lives_ok { $r.clear-history },
            'clear-history lives';
@@ -700,8 +702,8 @@ subtest sub {
            'history-get lives';
 #  lives_ok { $time-t = $r.history-get-time( $history-entry ) },
 #           'history-get-time lives';
-#  lives_ok { $size = $r.history-total-bytes },
-#           'history-total-bytes lives';
+  lives_ok { $size = $r.history-total-bytes },
+           'history-total-bytes lives';
   lives_ok { my $pos = $r.history-set-pos( 0 ) },
            'history-set-pos lives';
   lives_ok { $history-entry = $r.previous-history },
@@ -730,8 +732,8 @@ subtest sub {
            'history-arg-extract lives';
 #  lives_ok { my $index; my $res = $r.get-history-event( 'foo', \$index, "'" ) }, # XXX Wrap it properly
 #           'get-history-event lives';
-#  lives_ok { my @str = $r.history-tokenize( 'foo' ) }, # XXX Type issues
-#           'history-tokenize lives';
+  lives_ok { my @str = $r.history-tokenize( 'foo' ) }, # XXX Type issues
+           'history-tokenize lives';
 }, 'History';
 
 subtest sub {
@@ -815,7 +817,7 @@ lives_ok { my $rv = $r.rl-variable-bind( 'visible-bell', 'on' ) },
 #         'rl-named-function lives';
 #lives_ok { my $rv = $r.rl-function-of-keymap( 'XX', $map, \$type ) },
 #         'rl-function-of-keymap lives';
-#lives_ok { my $rv = $r.rl-list-funmap-names( 'XX' ) },
+#lives_ok { $r.rl-list-funmap-names( ) },
 #         'rl-list-funmap-names lives';
 #lives_ok { my $cmd;
 #           my @rv = $r.rl-invoking-keyseqs-in-map( &callback, \$cmd, $map ) },
@@ -823,12 +825,12 @@ lives_ok { my $rv = $r.rl-variable-bind( 'visible-bell', 'on' ) },
 #lives_ok { my $cmd;
 #           my @rv = $r.rl-invoking-keyseqs( &callback, \$cmd ) },
 #         'rl-invoking-keyseqs lives';
-lives_ok { my $rv = $r.rl-function-dumper( True ) },
-         'rl-function-dumper lives';
+#lives_ok { my $rv = $r.rl-function-dumper( True ) },
+#         'rl-function-dumper lives';
 lives_ok { my $rv = $r.rl-macro-dumper( True ) },
          'rl-macro-dumper lives';
-lives_ok { my $rv = $r.rl-variable-dumper( True ) },
-         'rl-variable-dumper lives';
+#lives_ok { $r.rl-variable-dumper( True ) },
+#         'rl-variable-dumper lives';
 lives_ok { my $rv = $r.rl-read-init-file( 'filename' ) },
          'rl-read-init-file lives';
 lives_ok { my $rv = $r.rl-parse-and-bind( 'XX' ) },
@@ -847,8 +849,8 @@ lives_ok { my $rv = $r.rl-begin-undo-group },
          'rl-begin-undo-group lives';
 lives_ok { my $rv = $r.rl-end-undo-group },
          'rl-end-undo-group lives';
-lives_ok { my $rv = $r.rl-modifying( 0, 1 ) },
-         'rl-modifying lives';
+#lives_ok { my $rv = $r.rl-modifying( 0, 1 ) },
+#         'rl-modifying lives';
 lives_ok { my $rv = $r.rl-redisplay },
          'rl-redisplay lives';
 lives_ok { my $rv = $r.rl-on-new-line },
@@ -863,8 +865,8 @@ lives_ok { my $rv = $r.rl-reset-line-state },
          'rl-reset-line-state lives';
 #lives_ok { my $rv = $r.rl-crlf },
 #         'rl-crlf lives';
-lives_ok { my $rv = $r.rl-show-char( 'X' ) },
-         'rl-show-char lives';
+#lives_ok { my $rv = $r.rl-show-char( 'X' ) },
+#         'rl-show-char lives';
 lives_ok { my $rv = $r.rl-save-prompt },
          'rl-save-prompt lives';
 lives_ok { my $rv = $r.rl-restore-prompt },
@@ -883,23 +885,23 @@ lives_ok { my $rv = $r.rl-prep-terminal( 1 ) },
          'rl-prep-terminal lives';
 lives_ok { my $rv = $r.rl-deprep-terminal },
          'rl-deprep-terminal lives';
-lives_ok { my $rv = $r.rl-tty-set-default-bindings( $map ) },
-         'rl-tty-set-default-bindings lives';
-lives_ok { my $rv = $r.rl-tty-unset-default-bindings( $map ) },
-         'rl-tty-unset-default-bindings lives';
+#lives_ok { my $rv = $r.rl-tty-set-default-bindings( $map ) },
+#         'rl-tty-set-default-bindings lives';
+#lives_ok { my $rv = $r.rl-tty-unset-default-bindings( $map ) },
+#         'rl-tty-unset-default-bindings lives';
 lives_ok { my $rv = $r.rl-reset-terminal( 'vt100' ) },
          'rl-reset-terminal lives';
-lives_ok { my $rv = $r.rl-foo( $map ) },
-         'rl-foo lives';
-lives_ok { my $rv = $r.rl-resize-terminal },
-         'rl-resize-terminal lives';
+#lives_ok { my $rv = $r.rl-foo( $map ) },
+#         'rl-foo lives';
+#lives_ok { my $rv = $r.rl-resize-terminal },
+#         'rl-resize-terminal lives';
 lives_ok { my $rv = $r.rl-set-screen-size( 80, 24 ) },
          'rl-set-screen-size lives';
-lives_ok { my ( $rows, $cols );
-           my $rv = $r.rl-get-screen-size( \$rows, \$cols ) },
-         'rl-get-screen-size lives';
-lives_ok { my $rv = $r.rl-reset-screen-size },
-         'rl-reset-screen-size lives';
+#lives_ok { my ( $rows, $cols );
+#           my $rv = $r.rl-get-screen-size( \$rows, \$cols ) },
+#         'rl-get-screen-size lives';
+#lives_ok { my $rv = $r.rl-reset-screen-size },
+#         'rl-reset-screen-size lives';
 lives_ok { my $rv = $r.rl-get-termcap( 'vt100' ) },
          'rl-get-termcap lives';
 lives_ok { my $rv = $r.rl-extend-line-buffer( 0 ) },
@@ -912,32 +914,32 @@ lives_ok { my $rv = $r.rl-set-signals },
          'rl-set-signals lives';
 lives_ok { my $rv = $r.rl-clear-signals },
          'rl-clear-signals lives';
-lives_ok { my $rv = $r.rl-cleanup-after-signal },
-         'rl-cleanup-after-signal lives';
+#lives_ok { my $rv = $r.rl-cleanup-after-signal },
+#         'rl-cleanup-after-signal lives';
 lives_ok { my $rv = $r.rl-reset-after-signal },
          'rl-reset-after-signal lives';
 #lives_ok { my $rv = $r.rl-free-line-state }, # XXX Can't run standalone?
 #         'rl-free-line-state lives';
-### =item rl-echo-signal( Int $c )
-### 
+#lives_ok { $r.rl-echo-signal( 0 ) },
+#         'rl-echo-signal lives';
 lives_ok { my $rv = $r.rl-set-paren-blink-timeout( 1 ) },
          'rl-set-paren-blink-timeout lives';
-lives_ok { my $rv = $r.rl-complete-internal( 1 ) },
-         'rl-complete-internal lives';
-lives_ok { my $rv = $r.rl-username-completion-function( 'jgoff', 1 ) },
-         'rl-username-completion-function lives';
-lives_ok { my $rv = $r.rl-filename-completion-function( 'ile.txt', 1 ) },
-         'rl-filename-completion-function lives';
+#lives_ok { my $rv = $r.rl-complete-internal( 1 ) },
+#         'rl-complete-internal lives';
+#lives_ok { my $rv = $r.rl-username-completion-function( 'jgoff', 1 ) },
+#         'rl-username-completion-function lives';
+#lives_ok { my $rv = $r.rl-filename-completion-function( 'ile.txt', 1 ) },
+#         'rl-filename-completion-function lives';
 #lives_ok { my $rv = $r.rl-completion-mode( \&callback ) },
 #         'rl-completion-mode lives';
-#lives_ok { my $rv = $r.rl-save-state( $readline-state },
+#lives_ok { my $rv = $r.rl-save-state( $readline-state ) },
 #         'rl-save-state lives';
-lives_ok { my $rv = $r.rl-tilde-expand( '~jgoff' ) },
-         'rl-tilde-expand lives';
-lives_ok { my $rv = $r.rl-tilde-expand-word( 'foo' ) },
-         'rl-tilde-expand-word lives';
-lives_ok { my $offset;
-           my $rv = $r.rl-tilde-find-word( 'foo', 1, \$offset ) },
-         'rl-tilde-find-word lives';
-#lives_ok { my $rv = $r.rl-restore-state( $readline-state },
+lives_ok { my $rv = $r.tilde-expand( '~jgoff' ) },
+         'tilde-expand lives';
+lives_ok { my $rv = $r.tilde-expand-word( 'foo' ) },
+         'tilde-expand-word lives';
+#lives_ok { my $offset;
+#           my $rv = $r.tilde-find-word( 'foo', 1, \$offset ) },
+#         'tilde-find-word lives';
+#lives_ok { my $rv = $r.rl-restore-state( $readline-state ) },
 #         'rl-restore-state lives';

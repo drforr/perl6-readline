@@ -603,7 +603,7 @@ These methods manipulate signal handling for L<Readline>.
 
     This will free any partial state associated with the current input line (undo information, any partial history entry, any partially-entered keyboard macro, and any partially-entered numeric argument). This should be called before C<rl_cleanup_after_signal()>. The Readline signal handler for SIGINT calls this to abort the current input line.
 
-=item rl-echo-signal( Int $c )
+=item rl-echo-signal( Int $c ) # XXX not in v6
 
     If an application wishes to install its own signal handlers, but still have readline display characters that generate signals, calling this function with sig set to SIGINT, SIGQUIT, or SIGTSTP will display the character generating that signal.
 
@@ -617,11 +617,11 @@ These methods manipulate signal handling for L<Readline>.
 
     Complete the word at or before point. C<$what-to-do> says what to do with the completion. A value of `?' means list the possible completions. `TAB' means do standard completion. `*' means insert all of the possible completions. `!' means to display all of the possible completions, if there is more than one, as well as performing partial completion. `@' is similar to `!', but possible completions are not listed if the possible completions share a common prefix.
 
-=item rl-username-completion-function ( Str $text, Int $i ) returns Str
+=item rl-username-completion-function ( Str $text, Int $i ) returns Str # XXX doesn't exist?
 
     A completion generator for usernames. C<$text> contains a partial username preceded by a random character (usually `~'). As with all completion generators, state is zero on the first call and non-zero for subsequent calls.
 
-=item rl-filename-completion-function ( Str $text, Int $i ) returns Str
+=item rl-filename-completion-function ( Str $text, Int $i ) returns Str # XXX Doesn't exist?
 
     A generator function for filename completion in the general case. C<$text> is a partial filename. The Bash source is a useful reference for writing application-specific completion functions (the Bash completion functions call this and other Readline functions).
 
@@ -1536,6 +1536,13 @@ class Readline {
     returns Int {
     rl_macro_bind( $str, $b, $map ) }
 
+  sub rl_named_function( Str, Str, Keymap )
+    returns Int
+    is native( LIB ) { * }
+#  method rl-named-function( Str $str ) {
+#    returns &callback (Int, Int --> Int) {
+#    rl_macro_bind( $str, $b, $map ) }
+
   sub rl_translate_keyseq( Str, Str, Pointer[Int] )
     returns Int
     is native( LIB ) { * }
@@ -1732,9 +1739,9 @@ class Readline {
   sub rl_show_char( Int )
     returns Int
     is native( LIB ) { * }
-  method rl-show-char( Int $c )
+  method rl-show-char( Str $c )
     returns Int {
-    rl_show_char( $c ) }
+    rl_show_char( ord( $c.substr(0,1) ) ) }
 
   # Undocumented in texinfo manual.
   #
@@ -1938,10 +1945,10 @@ class Readline {
   method rl-free-line-state( ) {
     rl_free_line_state( ) }
 
-  sub rl_echo_signal( Int )
-    is native( LIB ) { * }
-  method rl-echo-signal( Int $c ) {
-    rl_echo_signal( $c ) }
+#  sub rl_echo_signal( Int )
+#    is native( LIB ) { * }
+#  method rl-echo-signal( Int $c ) {
+#    rl_echo_signal( $c ) }
 
   sub rl_set_paren_blink_timeout( Int )
     returns Int
