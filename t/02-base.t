@@ -732,8 +732,8 @@ subtest sub {
            'history-arg-extract lives';
 #  lives_ok { my $index; my $res = $r.get-history-event( 'foo', \$index, "'" ) }, # XXX Wrap it properly
 #           'get-history-event lives';
-  lives_ok { my @str = $r.history-tokenize( 'foo' ) }, # XXX Type issues
-           'history-tokenize lives';
+#  lives_ok { my @str = $r.history-tokenize( 'foo' ) }, # XXX Type issues
+#           'history-tokenize lives';
 }, 'History';
 
 subtest sub {
