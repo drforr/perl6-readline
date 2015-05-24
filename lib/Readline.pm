@@ -76,11 +76,11 @@ These methods let you add, delete and manipulate history entries. See the L<exam
 
     Remove history entry at offset C<$which> from the history. The removed element is returned so you can free the line, data, and containing structure.
 
-=item free-history-entry( HIST_ENTRY $entry ) returns histdata_t
+=item free-history-entry( HIST_ENTRY $entry ) returns Str # histdata_t
 
     Free the history entry C<$entry> and any history library private data associated with it. Returns the application-specific data so the caller can dispose of it.
 
-=item replace-history-entry( Int $which, Str $line, histdata_t $data ) returns HIST_ENTRY
+=item replace-history-entry( Int $which, Str $line, Str $data ) returns HIST_ENTRY # histdata_t $data ) returns HIST_ENTRY
 
     Make the history entry at offset C<$which> have C<$line> and C<$data>. This returns the old entry so the caller can dispose of any application-specific data. In the case of an invalid C<$which>, a NULL pointer is returned.
 
@@ -658,7 +658,7 @@ class Readline {
 
   # Embedded typedefs here
   #
-  my class histdata_t is repr('CPointer') { } # typedef char *histdata_t;
+#  my class histdata_t is repr('CPointer') { } # typedef char *histdata_t;
   my class time_t is repr('CPointer') { } # XXX probably already a native type.
   my class Keymap is repr('CPointer') { } # typedef KEYMAP_ENTRY *Keymap;
   # typedef void rl_vcpfunc_t (char *);
@@ -692,7 +692,8 @@ class Readline {
   my class HIST_ENTRY is repr('CStruct') {
     has Str $.line;        # char *line;
     has Str $.timestamp;   # char *timestamp;
-    has histdata_t $.data; # histdata_t data;
+#    has histdata_t $.data; # histdata_t data;
+    has Str $.data;        # histdata_t is really char*
   }
 
   # Size of the history-library-managed space in history entry HS.
@@ -774,16 +775,20 @@ class Readline {
   # associated with it.
   #
   sub free_history_entry( HIST_ENTRY )
-    returns histdata_t
+#    returns histdata_t
+    returns Str
     is native( LIB ) { * }
   method free-history-entry( HIST_ENTRY $entry )
-    returns histdata_t {
+#    returns histdata_t {
+    returns Str {
     free_history_entry( $entry ) }
 
-  sub replace_history_entry( Int, Str, histdata_t )
+#  sub replace_history_entry( Int, Str, histdata_t )
+  sub replace_history_entry( Int, Str, Str )
     returns HIST_ENTRY
     is native( LIB ) { * }
-  method replace-history-entry( Int $which, Str $line, histdata_t $data )
+#  method replace-history-entry( Int $which, Str $line, histdata_t $data )
+  method replace-history-entry( Int $which, Str $line, Str $data )
     returns HIST_ENTRY {
       replace_history_entry( $which, $line, $data ) }
 
@@ -1416,6 +1421,9 @@ class Readline {
 #  method rl-bind-key( Str $key, &callback (Int, Int --> Int) )
 #    returns Int {
 #    rl_bind_key( ord( $key.substr(0,1) ), $cb ) }
+  method rl-bind-key( Str $key, $cb )
+    returns Int {
+    rl_bind_key( ord( $key.substr(0,1) ), $cb ) }
 
   sub rl_bind_key_in_map( Int, &callback (Int, Int --> Int), Keymap )
     returns Int
@@ -1423,6 +1431,9 @@ class Readline {
 #  method rl-bind-key-in-map( Str $key, rl_command_func_t $cb, Keymap $map )
 #    returns Int {
 #    rl_bind_key_in_map( ord( $key.substr(0,1) ), $cb, $map ) }
+  method rl-bind-key-in-map( Str $key, $cb, Keymap $map )
+    returns Int {
+    rl_bind_key_in_map( ord( $key.substr(0,1) ), $cb, $map ) }
 
   sub rl_unbind_key( Int )
     returns Int
@@ -1444,6 +1455,9 @@ class Readline {
 #  method rl-bind-key-if-unbound( Str $key, rl_command_func_t $cb )
 #    returns Int {
 #    rl_bind_key_if_unbound( ord( $key.substr(0,1) ), $cb ) }
+  method rl-bind-key-if-unbound( Str $key, $cb )
+    returns Int {
+    rl_bind_key_if_unbound( ord( $key.substr(0,1) ), $cb ) }
 
   sub rl_bind_key_if_unbound_in_map( Int, &callback (Int, Int --> Int), Keymap )
     returns Int
@@ -1452,6 +1466,10 @@ class Readline {
 #    ( Str $key, rl_command_func_t $cb, Keymap $map )
 #    returns Bool {
 #      rl_bind_key_if_unbound_in_map( ord( $key.substr(0,1) ), $cb, $map ) != 0 ?? False !! True }
+  method rl-bind-key-if-unbound-in-map
+    ( Str $key, $cb, Keymap $map )
+    returns Bool {
+      rl_bind_key_if_unbound_in_map( ord( $key.substr(0,1) ), $cb, $map ) != 0 ?? False !! True }
 
   sub rl_unbind_function_in_map( &callback (Int, Int --> Int), Keymap )
     returns Int
@@ -1466,6 +1484,9 @@ class Readline {
 #  method rl-bind-keyseq( Str $str, rl_command_func_t $cb )
 #    returns Bool {
 #      rl_bind_keyseq( $str, $cb ) != 0 ?? False !! True }
+  method rl-bind-keyseq( Str $str, $cb )
+    returns Bool {
+      rl_bind_keyseq( $str, $cb ) != 0 ?? False !! True }
 
   sub rl_bind_keyseq_in_map( Str, &callback (Int, Int --> Int), Keymap )
     returns Int
@@ -1473,6 +1494,9 @@ class Readline {
 #  method rl-bind-keyseq-in-map( Str $str, rl_command_func_t $cb, Keymap $map )
 #    returns Bool {
 #      rl_bind_keyseq_in_map( $str, $cb, $map ) != 0 ?? False !! True }
+  method rl-bind-keyseq-in-map( Str $str, $cb, Keymap $map )
+    returns Bool {
+      rl_bind_keyseq_in_map( $str, $cb, $map ) != 0 ?? False !! True }
 
   sub rl_bind_keyseq_if_unbound( Str, &callback (Int, Int --> Int) )
     returns Int
