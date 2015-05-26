@@ -641,7 +641,7 @@ These methods manipulate signal handling for L<Readline>.
 
     Do the work of tilde expansion on C<$filename>.  C<$filename> starts with a tilde.  If there is no expansion, call C<$tilde_expansion_failure_hook>.
 
-=item tilde-find-word( Str, Int, Pointer[Int] ) returns Str
+=item tilde-find-word( Str $word, Int $offset, Pointer[Int] $p-end-offset ) returns Str
 
     Find the portion of the string beginning with ~ that should be expanded.
 
@@ -1474,16 +1474,13 @@ class Readline {
   sub rl_unbind_function_in_map( &callback (Int, Int --> Int), Keymap )
     returns Int
     is native( LIB ) { * }
-#  method rl-unbind-function-in-map ( rl_command_func_t $cb, Keymap $map )
-#    returns Int {
-#      rl_unbind_function_in_map( $cb, $map ) }
+  method rl-unbind-function-in-map ( $cb, Keymap $map )
+    returns Int {
+      rl_unbind_function_in_map( $cb, $map ) }
 
   sub rl_bind_keyseq( Str, &callback (Int, Int --> Int) )
     returns Int
     is native( LIB ) { * }
-#  method rl-bind-keyseq( Str $str, rl_command_func_t $cb )
-#    returns Bool {
-#      rl_bind_keyseq( $str, $cb ) != 0 ?? False !! True }
   method rl-bind-keyseq( Str $str, $cb )
     returns Bool {
       rl_bind_keyseq( $str, $cb ) != 0 ?? False !! True }
@@ -1491,9 +1488,6 @@ class Readline {
   sub rl_bind_keyseq_in_map( Str, &callback (Int, Int --> Int), Keymap )
     returns Int
     is native( LIB ) { * }
-#  method rl-bind-keyseq-in-map( Str $str, rl_command_func_t $cb, Keymap $map )
-#    returns Bool {
-#      rl_bind_keyseq_in_map( $str, $cb, $map ) != 0 ?? False !! True }
   method rl-bind-keyseq-in-map( Str $str, $cb, Keymap $map )
     returns Bool {
       rl_bind_keyseq_in_map( $str, $cb, $map ) != 0 ?? False !! True }
@@ -1501,18 +1495,19 @@ class Readline {
   sub rl_bind_keyseq_if_unbound( Str, &callback (Int, Int --> Int) )
     returns Int
     is native( LIB ) { * }
-#  method rl-bind-keyseq-if-unbound( Str $str, rl_command_func_t $cb )
-#   returns Bool {
-#    rl_bind_keyseq_if_unbound( $str, $cb ) != 0 ?? False !! True }
+  method rl-bind-keyseq-if-unbound( Str $str, $cb )
+   returns Bool {
+    rl_bind_keyseq_if_unbound( $str, $cb ) != 0 ?? False !! True }
 
   sub rl_bind_keyseq_if_unbound_in_map
     ( Str, &callback (Int, Int --> Int), Keymap )
     returns Int
     is native( LIB ) { * }
-#  method rl-bind-keyseq-if-unbound-in-map
-#    ( Str $str, rl_command_func_t $cb, Keymap $map )
-#    returns Bool {
-#      rl_bind_keyseq_if_unbound_in_map( $str, $cb, $map ) != 0 ?? False !! True }
+  method rl-bind-keyseq-if-unbound-in-map
+    ( Str $str, $cb, Keymap $map )
+    returns Bool {
+      rl_bind_keyseq_if_unbound_in_map( $str, $cb, $map )
+        != 0 ?? False !! True }
 
   sub rl_generic_bind( Int, Str, Str, Keymap )
     returns Int
@@ -1524,9 +1519,9 @@ class Readline {
   sub rl_add_defun( Str, &callback (Int, Int --> Int), Int )
     returns Int
     is native( LIB ) { * }
-#  method rl-add-defun( Str $str, rl_command_func_t $cb, Str $key )
-#    returns Int {
-#    rl_add_defun( $str, $cb, ord( $key.substr(0,1) ) ) }
+  method rl-add-defun( Str $str, $cb, Str $key )
+    returns Int {
+    rl_add_defun( $str, $cb, ord( $key.substr(0,1) ) ) }
 
   sub rl_variable_value( Str )
     returns Str
@@ -1547,9 +1542,9 @@ class Readline {
   sub rl_set_key( Str, &callback (Int, Int --> Int), Keymap )
     returns Int
     is native( LIB ) { * }
-#  method rl-set-key( Str $str, rl_command_func_t $cb, Keymap $map )
-#    returns Int {
-#      rl_set_key( $str, $cb, $map ) }
+  method rl-set-key( Str $str, $cb, Keymap $map )
+    returns Int {
+      rl_set_key( $str, $cb, $map ) }
 
   # Backwards compatibility, use rl_generic_bind instead.
   #
@@ -1651,9 +1646,9 @@ class Readline {
   sub rl_add_funmap_entry( Str, &callback (Int, Int --> Int) )
     returns Int
     is native( LIB ) { * }
-#  method rl-add-funmap-entry( Str $name, rl_command_func_t $cb )
-#    returns Int {
-#    rl_add_funmap_entry( $name, $cb ) }
+  method rl-add-funmap-entry( Str $name, $cb ) # XXX Type this properly
+    returns Int {
+    rl_add_funmap_entry( $name, $cb ) }
 
   sub rl_funmap_names( )
     returns CArray[Str]
