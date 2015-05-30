@@ -13,11 +13,11 @@ lives-ok { my $rv = $r.rl-initialize },
 subtest sub {
   my $readable = False;
 
-#  lives-ok { $r.rl-function-dumper( $readable ) }, # XXX Generates output
+#  lives-ok { $r.rl-function-dumper( $readable ) }, # XXX Noisy
 #           'rl-function-dumper lives';
   lives-ok { $r.rl-macro-dumper( $readable ) },
            'rl-macro-dumper lives';
-#  lives-ok { $r.rl-variable-dumper( $readable ) }, # XXX Generates output
+#  lives-ok { $r.rl-variable-dumper( $readable ) }, # XXX Noisy
 #           'rl-variable-dumper lives';
 }, 'dumpers';
 
@@ -60,18 +60,20 @@ subtest sub {
            'rl-deprep-terminal lives';
   lives-ok { my $rv = $r.rl-reset-terminal( $terminal-name ) },
            'rl-reset-terminal';
-#  lives-ok { $r.rl-resize-terminal }, # XXX noisy
+#  lives-ok { $r.rl-resize-terminal }, # XXX Noisy
 #           'rl-resize-terminal lives';
 }, 'terminal';
 
 subtest sub {
+  my $readline-state;
   lives-ok { my $rv = $r.rl-reset-line-state },
            'rl-reset-line-state lives';
-#  lives-ok { $r.rl-free-line-state }, # XXX noisy
+#  lives-ok { $r.rl-free-line-state }, # XXX Noisy
 #           'rl-free-line-state lives';
-#  lives-ok { my $rv = $r.rl-save-state( readline_state $sp ) },
+#  lives-ok { my $rv = $r.rl-save-state( $readline-state ) },
 #           'rl-save-state lives';
-#  lives-ok { my $rv = $r.rl-restore-state( readline_state $sp ) };
+#  lives-ok { my $rv = $r.rl-restore-state( $readline-state ) },
+#           'rl-save-state lives';
 }, 'state';
 
 subtest sub {
@@ -91,7 +93,7 @@ subtest sub {
 
 #  lives-ok { $r.rl-list-funmap-names }, # XXX Noisy
 #           'rl-list-funmap-names lives';
-#  lives-ok { my $rv = $r.rl-add-funmap-entry( $name, &my-callback ) }, # XXX blows chunks in valgrind
+#  lives-ok { my $rv = $r.rl-add-funmap-entry( $name, &my-callback ) }, # XXX Blows chunks in valgrind
 #           'rl-add-funmap-entry lives';
   lives-ok { my @rv = $r.rl-funmap-names },
            'rl-funmap-names lives';
@@ -102,8 +104,10 @@ subtest sub {
 
   lives-ok { $r.rl-set-screen-size( $rows, $cols ) },
            'rl-set-screen-size';
-#  lives-ok { my $rv = $r.rl-get-screen-size( \$rows, \$cols ) }; # XXX Rewrite
-  lives-ok { $r.rl-reset-screen-size };
+#  lives-ok { $r.rl-get-screen-size( \$rows, \$cols ) }, # XXX Rewrite
+#           'rl-get-screen-size lives';
+  lives-ok { $r.rl-reset-screen-size },
+           'rl-reset-screen-size lives';
 }, 'screen';
 
 subtest sub {
@@ -217,7 +221,7 @@ subtest sub {
            'history-set-history-state lives';
   lives-ok { $r.add-history-time( $timestamp ) },
            'add-history-time lives';
-  lives-ok { $HIST-ENTRY = $r.remove-history( $index ) };
+  lives-ok { $HIST-ENTRY = $r.remove-history( $index ) },
            'remove-history lives';
   lives-ok { my $rv = $r.free-history-entry( $HIST-ENTRY ) },
            'free-history-entry lives';
@@ -227,7 +231,7 @@ subtest sub {
   lives-ok { $r.clear-history };
            'clear-history lives';
   subtest sub {
-    lives-ok { $r.history-is-stifled },
+    lives-ok { my $rv = $r.history-is-stifled },
              'history-is-stifled lives';
     lives-ok { $r.stifle-history( 0 ) },
              'stifle-history lives';
@@ -370,13 +374,15 @@ subtest sub {
            'rl-tty-unset-default-bindings lives';
   lives-ok { my $rv = $r.rl-get-termcap( $cap ) },
            'rl-get-termcap lives';
-#  lives-ok { my $rv = $r.rl-extend-line-buffer( $len ) },
-#           'rl-extend-line-buffer lives';
-#  lives-ok { my $rv = $r.rl-alphabetic( $c ) },
-#           'rl-alphabetic lives';
-###  lives-ok { $r.rl-free( Pointer $mem ) };
-#  lives-ok { my $rv = $r.rl-set-paren-blink-timeout( $timeout ) },
-#           'rl-set-paren-blink-timeout lives';
-##  my $what-to-do = 1;
-##  lives-ok { my $rv = $r.rl-complete-internal( $what-to-do ) };
+  lives-ok { my $rv = $r.rl-extend-line-buffer( $len ) },
+           'rl-extend-line-buffer lives';
+  lives-ok { my $rv = $r.rl-alphabetic( $c ) },
+           'rl-alphabetic lives';
+###  lives-ok { $r.rl-free( Pointer $mem ) }
+###           'rl-free lives';
+  lives-ok { my $rv = $r.rl-set-paren-blink-timeout( $timeout ) },
+           'rl-set-paren-blink-timeout lives';
+  my $what-to-do = 1;
+  lives-ok { my $rv = $r.rl-complete-internal( $what-to-do ) },
+           'rl-complete-internal lives';
 }, 'Miscellaneous';
