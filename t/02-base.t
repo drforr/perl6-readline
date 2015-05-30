@@ -89,7 +89,7 @@ subtest sub {
 
 subtest sub {
   my $name = 'foo';
-  sub my-callback( Int, Int ) returns Int { };
+  sub my-callback( Int $a, Int $b ) returns Int { 0 };
 
 #  lives-ok { $r.rl-list-funmap-names }, # XXX Noisy
 #           'rl-list-funmap-names lives';

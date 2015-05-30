@@ -658,13 +658,13 @@ class Readline {
 
   # Embedded typedefs here
   #
-#  my class histdata_t is repr('CPointer') { } # typedef char *histdata_t;
-  my class time_t is repr('CPointer') { } # XXX probably already a native type.
-  my class Keymap is repr('CPointer') { } # typedef KEYMAP_ENTRY *Keymap;
+#  my class histdata_t is repr('CPointer') { }; # typedef char *histdata_t;
+  my class time_t is repr('CPointer') { }; # XXX probably already a native type.
+  my class Keymap is repr('CPointer') { }; # typedef KEYMAP_ENTRY *Keymap;
   # typedef void rl_vcpfunc_t (char *);
 
-  #my class rl_command_func_t is repr('CPointer') { } #typedef int rl_command_func_t (int, int);
-  my class rl_compentry_func_t is repr('CPointer') { } #typedef char *rl_compentry_func_t (const char *, int);
+  #my class rl_command_func_t is repr('CPointer') { }; #typedef int rl_command_func_t (int, int);
+  my class rl_compentry_func_t is repr('CPointer') { }; #typedef char *rl_compentry_func_t (const char *, int);
 
   constant meta_character_threshold = 0x07f; # Larger than this is Meta.
   constant meta_character_bit       = 0x080; # x0000000, must be on.
