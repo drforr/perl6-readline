@@ -7,33 +7,33 @@ plan 17;
 
 my $r = Readline.new;
 
-lives-ok { my $rv = $r.rl-initialize },
-         'rl-initialize';
+lives-ok { my $rv = $r.initialize },
+         'initialize';
 
 subtest sub {
   my $readable = False;
 
-#  lives-ok { $r.rl-function-dumper( $readable ) }, # XXX Noisy
-#           'rl-function-dumper lives';
-  lives-ok { $r.rl-macro-dumper( $readable ) },
-           'rl-macro-dumper lives';
-#  lives-ok { $r.rl-variable-dumper( $readable ) }, # XXX Noisy
-#           'rl-variable-dumper lives';
+#  lives-ok { $r.function-dumper( $readable ) }, # XXX Noisy
+#           'function-dumper lives';
+  lives-ok { $r.macro-dumper( $readable ) },
+           'macro-dumper lives';
+#  lives-ok { $r.variable-dumper( $readable ) }, # XXX Noisy
+#           'variable-dumper lives';
 }, 'dumpers';
 
 subtest sub {
   my $prompt = 'readline$ ';
 
-  lives-ok { my $rv = $r.rl-set-prompt( $prompt ) },
-           'rl-set-prompt lives';
-  lives-ok { my $rv = $r.rl-expand-prompt( $prompt ) },
-           'rl-expand-prompt lives';
-  lives-ok { my $rv = $r.rl-on-new-line-with-prompt },
-           'rl-on-new-line-with-prompt lives';
-  lives-ok { $r.rl-save-prompt },
-           'rl-save-prompt lives';
-  lives-ok { $r.rl-restore-prompt },
-           'rl-restore-prompt lives';
+  lives-ok { my $rv = $r.set-prompt( $prompt ) },
+           'set-prompt lives';
+  lives-ok { my $rv = $r.expand-prompt( $prompt ) },
+           'expand-prompt lives';
+  lives-ok { my $rv = $r.on-new-line-with-prompt },
+           'on-new-line-with-prompt lives';
+  lives-ok { $r.save-prompt },
+           'save-prompt lives';
+  lives-ok { $r.restore-prompt },
+           'restore-prompt lives';
 }, 'prompt';
 
 subtest sub {
@@ -54,98 +54,98 @@ subtest sub {
   my $meta-flag = 1; # XXX Fix the type
   my $terminal-name = 'vt100';
 
-  lives-ok { $r.rl-prep-terminal( $meta-flag ) },
-           'rl-prep-terminal lives';
-  lives-ok { $r.rl-deprep-terminal },
-           'rl-deprep-terminal lives';
-  lives-ok { my $rv = $r.rl-reset-terminal( $terminal-name ) },
-           'rl-reset-terminal';
-#  lives-ok { $r.rl-resize-terminal }, # XXX Noisy
-#           'rl-resize-terminal lives';
+  lives-ok { $r.prep-terminal( $meta-flag ) },
+           'prep-terminal lives';
+  lives-ok { $r.deprep-terminal },
+           'deprep-terminal lives';
+  lives-ok { my $rv = $r.reset-terminal( $terminal-name ) },
+           'reset-terminal';
+#  lives-ok { $r.resize-terminal }, # XXX Noisy
+#           'resize-terminal lives';
 }, 'terminal';
 
 subtest sub {
   my $readline-state;
-  lives-ok { my $rv = $r.rl-reset-line-state },
-           'rl-reset-line-state lives';
-#  lives-ok { $r.rl-free-line-state }, # XXX Noisy
-#           'rl-free-line-state lives';
-#  lives-ok { my $rv = $r.rl-save-state( $readline-state ) },
-#           'rl-save-state lives';
-#  lives-ok { my $rv = $r.rl-restore-state( $readline-state ) },
-#           'rl-save-state lives';
+  lives-ok { my $rv = $r.reset-line-state },
+           'reset-line-state lives';
+#  lives-ok { $r.free-line-state }, # XXX Noisy
+#           'free-line-state lives';
+#  lives-ok { my $rv = $r.save-state( $readline-state ) },
+#           'save-state lives';
+#  lives-ok { my $rv = $r.restore-state( $readline-state ) },
+#           'save-state lives';
 }, 'state';
 
 subtest sub {
-  lives-ok { $r.rl-free-undo-list },
-           'rl-free-undo-list lives';
-  lives-ok { my $rv = $r.rl-do-undo },
-           'rl-do-undo lives';
-  lives-ok { my $rv = $r.rl-begin-undo-group },
-           'rl-begin-undo-group lives';
-  lives-ok { my $rv = $r.rl-end-undo-group },
-           'rl-end-undo-group lives';
+  lives-ok { $r.free-undo-list },
+           'free-undo-list lives';
+  lives-ok { my $rv = $r.do-undo },
+           'do-undo lives';
+  lives-ok { my $rv = $r.begin-undo-group },
+           'begin-undo-group lives';
+  lives-ok { my $rv = $r.end-undo-group },
+           'end-undo-group lives';
 }, 'undo';
 
 subtest sub {
   my $name = 'foo';
   sub my-callback( Int $a, Int $b ) returns Int { 0 };
 
-#  lives-ok { $r.rl-list-funmap-names }, # XXX Noisy
-#           'rl-list-funmap-names lives';
-#  lives-ok { my $rv = $r.rl-add-funmap-entry( $name, &my-callback ) }, # XXX Blows chunks in valgrind
-#           'rl-add-funmap-entry lives';
-  lives-ok { my @rv = $r.rl-funmap-names },
-           'rl-funmap-names lives';
+#  lives-ok { $r.list-funmap-names }, # XXX Noisy
+#           'list-funmap-names lives';
+#  lives-ok { my $rv = $r.add-funmap-entry( $name, &my-callback ) }, # XXX Blows chunks in valgrind
+#           'add-funmap-entry lives';
+  lives-ok { my @rv = $r.funmap-names },
+           'funmap-names lives';
 }, 'funmap';
 
 subtest sub {
   my ( $rows, $cols ) = ( 80, 24 );
 
-  lives-ok { $r.rl-set-screen-size( $rows, $cols ) },
-           'rl-set-screen-size';
-#  lives-ok { $r.rl-get-screen-size( \$rows, \$cols ) }, # XXX Rewrite
-#           'rl-get-screen-size lives';
-  lives-ok { $r.rl-reset-screen-size },
-           'rl-reset-screen-size lives';
+  lives-ok { $r.set-screen-size( $rows, $cols ) },
+           'set-screen-size';
+#  lives-ok { $r.get-screen-size( \$rows, \$cols ) }, # XXX Rewrite
+#           'get-screen-size lives';
+  lives-ok { $r.reset-screen-size },
+           'reset-screen-size lives';
 }, 'screen';
 
 subtest sub {
   my $text = 'food';
   my ( $start, $end ) = ( 1, 2 );
 
-  lives-ok { my $rv = $r.rl-insert-text( $text ) },
-           'rl-insert-text lives';
-  lives-ok { my $rv = $r.rl-delete-text( $start, $end ) },
-           'rl-delete-text lives';
-  lives-ok { my $rv = $r.rl-kill-text( $start, $end ) },
-           'rl-kill-text lives';
-  lives-ok { my $rv = $r.rl-copy-text( $start, $end ) },
-           'rl-copy-text lives';
+  lives-ok { my $rv = $r.insert-text( $text ) },
+           'insert-text lives';
+  lives-ok { my $rv = $r.delete-text( $start, $end ) },
+           'delete-text lives';
+  lives-ok { my $rv = $r.kill-text( $start, $end ) },
+           'kill-text lives';
+  lives-ok { my $rv = $r.copy-text( $start, $end ) },
+           'copy-text lives';
 }, 'text';
 
 subtest sub {
   my $keymap;
   my $name = 'emacs';
 
-  lives-ok { $keymap = $r.rl-make-bare-keymap },
-           'rl-make-bare-keymap lives';
-  lives-ok { my $copy-keymap = $r.rl-copy-keymap( $keymap ) },
-           'rl-copy-keymap lives';
-  lives-ok { my $keymap = $r.rl-make-keymap },
-           'rl-make-keymap lives';
-  lives-ok { $r.rl-discard-keymap( $keymap ) },
-           'rl-discard-keymap lives';
-  lives-ok { $r.rl-free-keymap( $keymap ) },
-           'rl-free-keymap lives';
-  lives-ok { my $keymap = $r.rl-get-keymap-by-name( $name ) },
-           'rl-get-keymap-by-name lives';
-  lives-ok { my $keymap = $r.rl-get-keymap },
-           'rl-get-keymap lives';
-  lives-ok { my $name = $r.rl-get-keymap-name( $keymap ) },
-           'rl-get-keymap-name lives';
-  lives-ok { $r.rl-set-keymap( $keymap ) },
-           'rl-set-keymap lives';
+  lives-ok { $keymap = $r.make-bare-keymap },
+           'make-bare-keymap lives';
+  lives-ok { my $copy-keymap = $r.copy-keymap( $keymap ) },
+           'copy-keymap lives';
+  lives-ok { my $keymap = $r.make-keymap },
+           'make-keymap lives';
+  lives-ok { $r.discard-keymap( $keymap ) },
+           'discard-keymap lives';
+  lives-ok { $r.free-keymap( $keymap ) },
+           'free-keymap lives';
+  lives-ok { my $keymap = $r.get-keymap-by-name( $name ) },
+           'get-keymap-by-name lives';
+  lives-ok { my $keymap = $r.get-keymap },
+           'get-keymap lives';
+  lives-ok { my $name = $r.get-keymap-name( $keymap ) },
+           'get-keymap-name lives';
+  lives-ok { $r.set-keymap( $keymap ) },
+           'set-keymap lives';
 }, 'keymap';
 
 subtest sub {
@@ -155,48 +155,48 @@ subtest sub {
   my $line = 'foo';
 
   subtest sub {
-    my $keymap = $r.rl-make-bare-keymap;
+    my $keymap = $r.make-bare-keymap;
     my $index = 0;
     my $macro = 'xx';
-    lives-ok { my $rv = $r.rl-bind-key-in-map( $key, &my-callback, $keymap ) },
-             'rl-bind-key-in-map lives';
-    lives-ok { my $rv = $r.rl-bind-key-if-unbound-in-map(
+    lives-ok { my $rv = $r.bind-key-in-map( $key, &my-callback, $keymap ) },
+             'bind-key-in-map lives';
+    lives-ok { my $rv = $r.bind-key-if-unbound-in-map(
                            $key, &my-callback, $keymap ) },
-             'rl-bind-key-if-unbound-in-map lives';
-    lives-ok { my $rv = $r.rl-bind-keyseq-in-map(
+             'bind-key-if-unbound-in-map lives';
+    lives-ok { my $rv = $r.bind-keyseq-in-map(
                            $keyseq, &my-callback, $keymap ) },
-             'rl-bind-keyseq-in-map lives';
-#    lives-ok { my $rv = $r.rl-bind-keyseq-if-unbound-in-map( # XXX Blows chunks under valgrid by cascading to rl_generic_bind
+             'bind-keyseq-in-map lives';
+#    lives-ok { my $rv = $r.bind-keyseq-if-unbound-in-map( # XXX Blows chunks under valgrid by cascading to rl_generic_bind
 #                           $keyseq, &my-callback, $keymap ) },
-#             'rl-bind-keyseq-if-unbound-in-map lives';
-#    lives-ok { my $rv = $r.rl-generic-bind( $index, $keyseq, $line, $keymap ) }, # XXX Blows chunks under valgrind
-#             'rl-generic-bind lives';
-    lives-ok { my $rv = $r.rl-macro-bind( $keyseq, $macro, $keymap ) },
-             'rl-macro-bind lives';
+#             'bind-keyseq-if-unbound-in-map lives';
+#    lives-ok { my $rv = $r.generic-bind( $index, $keyseq, $line, $keymap ) }, # XXX Blows chunks under valgrind
+#             'generic-bind lives';
+    lives-ok { my $rv = $r.macro-bind( $keyseq, $macro, $keymap ) },
+             'macro-bind lives';
   }, 'bind keymaps';
-#  lives-ok { my $rv = $r.rl-bind-key( $key, &my-callback ) }, # XXX Blows chunks under valgrind
-#           'rl-bind-key lives';
-#  lives-ok { my $rv = $r.rl-bind-key-if-unbound( $key, &my-callback ) }, # XXX Blows chunks under valgrind
-#           'rl-bind-key-if-unbound lives';
-#  lives-ok { my $rv = $r.rl-bind-keyseq( $keyseq, &my-callback ) }, # XXX Blows chunks under valgrind by cascading to rl_generic_bind
-#           'rl-bind-keyseq lives';
-#  lives-ok { my $rv = $r.rl-bind-keyseq-if-unbound( $keyseq, &my-callback ) }, # XXX Blows chunks under valgrind by cascading to rl_generic_bind
-#           'rl-bind-keyseq-if-unbound lives';
-#  lives-ok { my $rv = $r.rl-parse-and-bind( $line ) }, # XXX Blows chunks in valgrind by cascading to rl_generic_bind
-#           'rl-parse-and-bind lives';
+#  lives-ok { my $rv = $r.bind-key( $key, &my-callback ) }, # XXX Blows chunks under valgrind
+#           'bind-key lives';
+#  lives-ok { my $rv = $r.bind-key-if-unbound( $key, &my-callback ) }, # XXX Blows chunks under valgrind
+#           'bind-key-if-unbound lives';
+#  lives-ok { my $rv = $r.bind-keyseq( $keyseq, &my-callback ) }, # XXX Blows chunks under valgrind by cascading to rl_generic_bind
+#           'bind-keyseq lives';
+#  lives-ok { my $rv = $r.bind-keyseq-if-unbound( $keyseq, &my-callback ) }, # XXX Blows chunks under valgrind by cascading to rl_generic_bind
+#           'bind-keyseq-if-unbound lives';
+#  lives-ok { my $rv = $r.parse-and-bind( $line ) }, # XXX Blows chunks in valgrind by cascading to rl_generic_bind
+#           'parse-and-bind lives';
 }, 'bind';
 
 subtest sub {
   my $key = 'x';
-  my $keymap = $r.rl-make-bare-keymap;
+  my $keymap = $r.make-bare-keymap;
   sub my-callback( Int $a, Int $b ) returns Int { }
 
-#  lives-ok { my $rv = $r.rl-unbind-key( $key ) }, # XXX Blows chunks under valgrind?
-#           'rl-unbind-key lives';
-  lives-ok { my $rv = $r.rl-unbind-key-in-map( $key, $keymap ) },
-           'rl-unbind-key-in-map lives';
-  lives-ok { my $rv = $r.rl-unbind-function-in-map( &my-callback, $keymap ) },
-           'rl-unbind-function-in-map lives';
+#  lives-ok { my $rv = $r.unbind-key( $key ) }, # XXX Blows chunks under valgrind?
+#           'unbind-key lives';
+  lives-ok { my $rv = $r.unbind-key-in-map( $key, $keymap ) },
+           'unbind-key-in-map lives';
+  lives-ok { my $rv = $r.unbind-function-in-map( &my-callback, $keymap ) },
+           'unbind-function-in-map lives';
 }, 'unbind';
 
 subtest sub {
@@ -291,18 +291,18 @@ subtest sub {
   my $filename = 'sample.txt';
   my $index = 0;
 
-#  lives-ok { my $rv = $r.rl-username-completion-function(
+#  lives-ok { my $rv = $r.username-completion-function(
 #                         $username, $index ) }; # XXX doesn't exist?
-#  lives-ok { my $rv = $r.rl-filename-completion-function (
+#  lives-ok { my $rv = $r.filename-completion-function (
 #                         $filename, $index ) }; # XXX Doesn't exist?
-#  lives-ok { my $rv = $r.rl-completion-mode(
+#  lives-ok { my $rv = $r.completion-mode(
 #                         Pointer[&callback (Int, Int --> Int)] $cfunc ) };
 }, 'completion';
 
 #subtest sub {
-#  lives-ok { $r.rl-callback-handler-install( Str $prompt, &callback (Str) ) };
-#  lives-ok { $r.rl-callback-read-char };
-#  lives-ok { $r.rl-callback-handler-remove };
+#  lives-ok { $r.callback-handler-install( Str $prompt, &callback (Str) ) };
+#  lives-ok { $r.callback-read-char };
+#  lives-ok { $r.callback-handler-remove };
 #}, 'callback';
 
 subtest sub {
@@ -310,79 +310,79 @@ subtest sub {
   my $filename = 'sample.txt';
   my $index = 0;
 
-#  lives-ok { my $rv = $r.rl-username-completion-function( $username, $index ) }; # XXX doesn't exist?
-#  lives-ok { my $rv = $r.rl-filename-completion-function ( $filename, $index ) }; # XXX Doesn't exist?
-#  lives-ok { my $rv = $r.rl-completion-mode( Pointer[&callback (Int, Int --> Int)] $cfunc ) };
+#  lives-ok { my $rv = $r.username-completion-function( $username, $index ) }; # XXX doesn't exist?
+#  lives-ok { my $rv = $r.filename-completion-function ( $filename, $index ) }; # XXX Doesn't exist?
+#  lives-ok { my $rv = $r.completion-mode( Pointer[&callback (Int, Int --> Int)] $cfunc ) };
 }, 'completion';
 
 ##subtest sub {
-##  lives-ok { my $rv = $r.rl-function-of-keyseq( $keyseq, $map, Pointer[Int] $type ) returns &callback (Int, Int --> Int) };
-##  lives-ok { my $rv = $r.rl-invoking-keyseqs-in-map( Pointer[&callback (Int, Int --> Int)] $p-cmd, Keymap $map ) returns CArray[Str] };
-##  lives-ok { my $rv = $r.rl-invoking-keyseqs( Pointer[&callback (Int, Int --> Int)] $p-cmd ) returns CArray[Str] };
+##  lives-ok { my $rv = $r.function-of-keyseq( $keyseq, $map, Pointer[Int] $type ) returns &callback (Int, Int --> Int) };
+##  lives-ok { my $rv = $r.invoking-keyseqs-in-map( Pointer[&callback (Int, Int --> Int)] $p-cmd, Keymap $map ) returns CArray[Str] };
+##  lives-ok { my $rv = $r.invoking-keyseqs( Pointer[&callback (Int, Int --> Int)] $p-cmd ) returns CArray[Str] };
 ##}, 'keyseq';
 
 ##
 ## These tests apparently mess with terminal settings. They pass, though.
 ##
 ##subtest sub {
-##  lives-ok { my $rv = $r.rl-set-signals }, 'rl-set-signals lives';
-##  lives-ok { my $rv = $r.rl-clear-signals }, 'rl-clear-signals lives';
-##  lives-ok { $r.rl-cleanup-after-signal }, 'rl-cleanup-after-signal lives';
-##  lives-ok { $r.rl-reset-after-signal }, 'rl-reset-after-signal lives';
+##  lives-ok { my $rv = $r.set-signals }, 'set-signals lives';
+##  lives-ok { my $rv = $r.clear-signals }, 'clear-signals lives';
+##  lives-ok { $r.cleanup-after-signal }, 'cleanup-after-signal lives';
+##  lives-ok { $r.reset-after-signal }, 'reset-after-signal lives';
 ##}, 'signal';
 
 subtest sub {
 ####  lives-ok { my $rv = $r.readline( Str $prompt ) returns Str };
-####  lives-ok { my $rv = $r.rl-ding }; # XXX Don't annoy the user.
-##  lives-ok { my $rv = $r.rl-add-defun( Str $str, &callback (Int, Int --> Int), Str $key ) returns Int };
-##  lives-ok { my $rv = $r.rl-variable-value( Str $variable ) returns Str };
-##  lives-ok { $r.rl-set-key( Str $str, &callback (Int, Int --> Int), Keymap $map ) };
-##  lives-ok { my $rv = $r.rl-named-function( Str $s ) returns &callback (Int, Int --> Int) };
+####  lives-ok { my $rv = $r.ding }; # XXX Don't annoy the user.
+##  lives-ok { my $rv = $r.add-defun( Str $str, &callback (Int, Int --> Int), Str $key ) returns Int };
+##  lives-ok { my $rv = $r.variable-value( Str $variable ) returns Str };
+##  lives-ok { $r.set-key( Str $str, &callback (Int, Int --> Int), Keymap $map ) };
+##  lives-ok { my $rv = $r.named-function( Str $s ) returns &callback (Int, Int --> Int) };
   my $filename = 'doesnt-exist.txt';
   my $macro = 'xx';
   my ( $start, $end ) = ( 1, 2 );
-  lives-ok { $r.rl-read-init-file( $filename ) },
-           'rl-read-init-file lives';
-  lives-ok { $r.rl-push-macro-input( $macro ) },
-         'rl-push-macro-input lives';
-  lives-ok { my $rv = $r.rl-modifying( $start, $end ) },
-           'rl-modifying lives';
-##  lives-ok { $r.rl-redisplay }, # XXX Noisy
-##           'rl-redisplay lives';
-##  lives-ok { my $rv = $r.rl-on-new-line }, # XXX Noisy
-##           'rl-on-new-line lives';
-##  lives-ok { my $rv = $r.rl-forced-update-display }, # XXX Noisy
-##           'rl-forced-update-display lives';
-##  lives-ok { my $rv = $r.rl-clear-message }, # XXX Noisy
-##           'rl-clear-message lives';
-##  lives-ok { my $rv = $r.rl-crlf }, # XXX Noisy
-##           'rl-crlf lives';
+  lives-ok { $r.read-init-file( $filename ) },
+           'read-init-file lives';
+  lives-ok { $r.push-macro-input( $macro ) },
+         'push-macro-input lives';
+  lives-ok { my $rv = $r.modifying( $start, $end ) },
+           'modifying lives';
+##  lives-ok { $r.redisplay }, # XXX Noisy
+##           'redisplay lives';
+##  lives-ok { my $rv = $r.on-new-line }, # XXX Noisy
+##           'on-new-line lives';
+##  lives-ok { my $rv = $r.forced-update-display }, # XXX Noisy
+##           'forced-update-display lives';
+##  lives-ok { my $rv = $r.clear-message }, # XXX Noisy
+##           'clear-message lives';
+##  lives-ok { my $rv = $r.crlf }, # XXX Noisy
+##           'crlf lives';
   my $c = 'x';
   my $line = 'foo';
   my $clear-undo = 1;
-  my $keymap = $r.rl-make-bare-keymap;
+  my $keymap = $r.make-bare-keymap;
   my $cap = 'termcap.1';
   my $len = 1;
   my $timeout = 3;
-##  lives-ok { my $rv = $r.rl-show-char( $c ) }, # XXX Noisy
-##           'rl-show-char lives';
-  lives-ok { $r.rl-replace-line( $line, $clear-undo ) },
-           'rl-replace-line';
-  lives-ok { $r.rl-tty-set-default-bindings( $keymap ) },
-           'rl-tty-set-default-bindings lives';
-  lives-ok { $r.rl-tty-unset-default-bindings( $keymap ) },
-           'rl-tty-unset-default-bindings lives';
-  lives-ok { my $rv = $r.rl-get-termcap( $cap ) },
-           'rl-get-termcap lives';
-  lives-ok { my $rv = $r.rl-extend-line-buffer( $len ) },
-           'rl-extend-line-buffer lives';
-  lives-ok { my $rv = $r.rl-alphabetic( $c ) },
-           'rl-alphabetic lives';
-###  lives-ok { $r.rl-free( Pointer $mem ) }
-###           'rl-free lives';
-  lives-ok { my $rv = $r.rl-set-paren-blink-timeout( $timeout ) },
-           'rl-set-paren-blink-timeout lives';
+##  lives-ok { my $rv = $r.show-char( $c ) }, # XXX Noisy
+##           'show-char lives';
+  lives-ok { $r.replace-line( $line, $clear-undo ) },
+           'replace-line';
+  lives-ok { $r.tty-set-default-bindings( $keymap ) },
+           'tty-set-default-bindings lives';
+  lives-ok { $r.tty-unset-default-bindings( $keymap ) },
+           'tty-unset-default-bindings lives';
+  lives-ok { my $rv = $r.get-termcap( $cap ) },
+           'get-termcap lives';
+  lives-ok { my $rv = $r.extend-line-buffer( $len ) },
+           'extend-line-buffer lives';
+  lives-ok { my $rv = $r.alphabetic( $c ) },
+           'alphabetic lives';
+###  lives-ok { $r.free( Pointer $mem ) }
+###           'free lives';
+  lives-ok { my $rv = $r.set-paren-blink-timeout( $timeout ) },
+           'set-paren-blink-timeout lives';
   my $what-to-do = 1;
-  lives-ok { my $rv = $r.rl-complete-internal( $what-to-do ) },
-           'rl-complete-internal lives';
+  lives-ok { my $rv = $r.complete-internal( $what-to-do ) },
+           'complete-internal lives';
 }, 'Miscellaneous';
