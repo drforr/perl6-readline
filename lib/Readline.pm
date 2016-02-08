@@ -654,7 +654,7 @@ These methods manipulate signal handling for L<Readline>.
 =end pod
 
 class Readline {
-  my constant LIB = 'libreadline.so.6';
+  my constant LIB = 'readline';
 
   # Embedded typedefs here
   #
