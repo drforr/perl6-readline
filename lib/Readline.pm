@@ -653,7 +653,7 @@ These methods manipulate signal handling for L<Readline>.
 
 =end pod
 
-class Readline:ver<0.1.2> {
+class Readline:ver<0.1.3> {
 
   sub LIBREADLINE {
     my $library = 'readline';
