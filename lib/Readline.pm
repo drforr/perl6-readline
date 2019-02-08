@@ -711,6 +711,15 @@ class Readline:ver<0.1.4> {
       last;
     }
 
+    given $*DISTRO.name {
+      when 'slackware' {
+        if $version ~~ v6 {
+          my sub tgetnum(Str --> int32) is native('ncurses') { * }
+          tgetnum('');
+        }
+      }
+    }
+
     ( $library, $version )
   }
 
