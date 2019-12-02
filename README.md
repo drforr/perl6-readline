@@ -30,6 +30,10 @@ Or alternatively installing it from a checkout of this repo with zef:
     zef install .
 ```
 
+## Usage
+
+See the `examples/` directory in this project.
+
 ## Testing
 
 To run tests:
